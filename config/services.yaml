@@ -22,3 +22,7 @@ services:
 
     # add more service definitions when explicit configuration is needed
     # please note that last definitions always *replace* previous ones
+    FusionAuth\FusionAuthClient:
+        arguments:
+            - "8uMZPWqyB69hPNl7aT7ypN4brubSHzmKo4JNPJngYHLXONaZHsAZW7cU"  #todo configure as env variables
+            - "http://localhost:9011"
