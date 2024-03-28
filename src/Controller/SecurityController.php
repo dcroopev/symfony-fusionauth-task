@@ -30,7 +30,7 @@ class SecurityController extends AbstractController
             "applicationId" => $loginRequest->getApplicationId(),
         ]);
 
-        $responseContent = $serializer->serialize($authResult, 'json');
+        $responseContent = $serializer->serialize($authResult->successResponse, 'json');
 
         if (!$authResult->wasSuccessful()) { //todo error handling
             return new JsonResponse(data: $responseContent, status: $authResult->status, json: true);
@@ -43,7 +43,6 @@ class SecurityController extends AbstractController
     #[Route('/api/logout', name: 'logout', methods: 'POST')]
     public function logout()
     {
-
     }
 
 }

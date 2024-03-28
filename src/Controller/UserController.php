@@ -11,6 +11,7 @@ use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Component\Security\Http\Attribute\CurrentUser;
 
 class UserController extends AbstractController
 {
@@ -21,10 +22,9 @@ class UserController extends AbstractController
 
 
     #[Route('/api/user', name: 'user-retrieve', methods: 'GET')]
-    public function retrieveUser(DTOSerializer $serializer, Request $request, ?string $email = null)
+    public function retrieveUser(DTOSerializer $serializer, Request $request): JsonResponse
     {
         //todo implement jwt retrieval if loginId is not provided
-
         $emailRequest = $serializer->deserialize($request->getContent(), User::class, 'json');
 
         $result = $this->client->retrieveUserByLoginId($emailRequest->getEmail());
@@ -74,9 +74,13 @@ class UserController extends AbstractController
     }
 
     #[Route('/api/user', name: 'user-delete', methods: 'DELETE')]
-    public function deleteUser(DTOSerializer $serializer, Request $request): JsonResponse
+    public function deleteUser(DTOSerializer $serializer, Request $request, #[CurrentUser] ?\App\Security\User $user): JsonResponse
     {
         $deleteIdRequest = $serializer->deserialize($request->getContent(), User::class, 'json');
+        if ($deleteIdRequest->getId() === $user->getId()){
+            return new JsonResponse(status: Response::HTTP_FORBIDDEN);
+        }
+
         $result = $this->client->deactivateUser($deleteIdRequest->getId());
         if (!$result->wasSuccessful()) { //todo error handling
             return new JsonResponse($result, $result->status);

@@ -16,6 +16,8 @@ class User
 
     private ?string $birthDate;
 
+    private ?bool $active;
+
     public function getEmail(): ?string
     {
         return $this->email;
@@ -79,6 +81,17 @@ class User
     public function setId(?string $id): User
     {
         $this->id = $id;
+        return $this;
+    }
+
+    public function getActive(): ?bool
+    {
+        return $this->active;
+    }
+
+    public function setActive(?bool $active): User
+    {
+        $this->active = $active;
         return $this;
     }
 
