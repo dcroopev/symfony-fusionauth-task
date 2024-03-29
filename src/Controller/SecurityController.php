@@ -30,12 +30,15 @@ class SecurityController extends AbstractController
         $loginRequest = $serializer->deserialize($request->getContent(), LoginRequest::class, 'json');
         $loginRequestArray = $serializer->toArray($loginRequest);
 
-        $responseData = $this->client->login($loginRequestArray);
-        $responseData = $this->fusionAuthResponseHandler->handle($responseData);
+        $response = $this->client->login($loginRequestArray);
+        $response = $this->fusionAuthResponseHandler->handle($response);
+
+        $responseData = $response->successResponse;
+        $statusCode = $response->status;
 
         $responseContent = $this->dtoSerializerFilter->filter($responseData, Token::class);
 
-        return new JsonResponse(data: $responseContent, status: Response::HTTP_OK, json: true);
+        return new JsonResponse(data: $responseContent, status: $statusCode, json: true);
     }
 
 }

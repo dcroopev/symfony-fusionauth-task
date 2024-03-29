@@ -7,13 +7,13 @@ use FusionAuth\ClientResponse;
 class FusionAuthResponseHandler
 {
 
-    public function handle(ClientResponse $response): ?\StdClass
+    public function handle(ClientResponse $response): ?ClientResponse
     {
-        if (!$response->wasSuccessful()){
+        if (!$response->wasSuccessful()) {
             throw new FusionAuthClientException();
         }
 
-        return $response->successResponse;
+        return $response;
     }
 
 }

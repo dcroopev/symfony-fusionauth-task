@@ -34,12 +34,15 @@ class UserController extends AbstractController
         //todo implement jwt retrieval if loginId is not provided
         $emailRequest = $serializer->deserialize($request->getContent(), User::class, 'json');
 
-        $responseData = $this->client->retrieveUserByLoginId($emailRequest->getEmail());
-        $responseData = $this->fusionAuthResponseHandler->handle($responseData);
+        $response = $this->client->retrieveUserByLoginId($emailRequest->getEmail());
+        $response = $this->fusionAuthResponseHandler->handle($response);
+
+        $responseData = $response->successResponse;
+        $statusCode = $response->status;
 
         $responseContent = $this->dtoSerializerFilter->filter($responseData->user, User::class);
 
-        return new JsonResponse(data: $responseContent, status: Response::HTTP_OK, json: true);
+        return new JsonResponse(data: $responseContent, status: $statusCode, json: true);
     }
 
 
@@ -49,12 +52,15 @@ class UserController extends AbstractController
         $createUserRequest = $serializer->deserialize($request->getContent(), CreateUserRequest::class, 'json');
         $createUserRequestArray = $serializer->toArray($createUserRequest);;
 
-        $responseData = $this->client->createUser(null, $createUserRequestArray);
-        $responseData = $this->fusionAuthResponseHandler->handle($responseData);
+        $response = $this->client->createUser(null, $createUserRequestArray);
+        $response = $this->fusionAuthResponseHandler->handle($response);
+
+        $responseData = $response->successResponse;
+        $statusCode = $response->status;
 
         $responseContent = $this->dtoSerializerFilter->filter($responseData, Token::class);
 
-        return new JsonResponse(data: $responseContent, status: Response::HTTP_OK, json: true);
+        return new JsonResponse(data: $responseContent, status: $statusCode, json: true);
     }
 
 
@@ -64,12 +70,15 @@ class UserController extends AbstractController
         $createUserRequest = $serializer->deserialize($request->getContent(), User::class, 'json');
 
         $createUserRequestArray = ['user' => $serializer->toArray($createUserRequest)];
-        $responseData = $this->client->updateUser($createUserRequest->getId(), $createUserRequestArray);
+        $response = $this->client->updateUser($createUserRequest->getId(), $createUserRequestArray);
 
-        $responseData = $this->fusionAuthResponseHandler->handle($responseData);
+        $response = $this->fusionAuthResponseHandler->handle($response);
+        $responseData = $response->successResponse;
+        $statusCode = $response->status;
+
         $responseContent = $this->dtoSerializerFilter->filter($responseData->user, User::class);
 
-        return new JsonResponse(data: $responseContent, status: Response::HTTP_OK, json: true);
+        return new JsonResponse(data: $responseContent, status: $statusCode, json: true);
     }
 
 
@@ -82,13 +91,17 @@ class UserController extends AbstractController
         $deleteIdRequest = $serializer->deserialize($request->getContent(), User::class, 'json');
 
         if ($deleteIdRequest->getId() === $user->getId()) {
+            //todo throw error and handle in listener
             return new JsonResponse(status: Response::HTTP_FORBIDDEN);
         }
 
-        $responseData = $this->client->deactivateUser($deleteIdRequest->getId());
-        $responseData = $this->fusionAuthResponseHandler->handle($responseData);
+        $response = $this->client->deactivateUser($deleteIdRequest->getId());
+        $response = $this->fusionAuthResponseHandler->handle($response);
 
-        return new JsonResponse(status: Response::HTTP_OK);
+
+        $statusCode = $response->status;
+
+        return new JsonResponse(status: $statusCode);
     }
 
 
@@ -97,11 +110,14 @@ class UserController extends AbstractController
     {
         $searchRequest = $serializer->deserialize($request->getContent(), SearchRequest::class, 'json');
 
-        $responseData = $this->client->searchUsersByQuery($searchRequest->toArray());
-        $responseData = $this->fusionAuthResponseHandler->handle($responseData);
+        $response = $this->client->searchUsersByQuery($searchRequest->toArray());
+        $response = $this->fusionAuthResponseHandler->handle($response);
+
+        $responseData = $response->successResponse;
+        $statusCode = $response->status;
 
         $responseContent = $this->dtoSerializerFilter->filter($responseData, SearchResponse::class);
 
-        return new JsonResponse($responseContent, status: Response::HTTP_OK, json: true);
+        return new JsonResponse($responseContent, status: $statusCode, json: true);
     }
 }
