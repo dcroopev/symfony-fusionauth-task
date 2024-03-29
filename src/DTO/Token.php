@@ -7,6 +7,7 @@ class Token
     private ?string $token;
     private ?int $tokenExpirationInstant;
     private ?User $user;
+    private ?Registration $registration;
 
     public function getToken(): ?string
     {
@@ -38,6 +39,17 @@ class Token
     public function setUser(?User $user): Token
     {
         $this->user = $user;
+        return $this;
+    }
+
+    public function getRegistration(): ?Registration
+    {
+        return $this->registration;
+    }
+
+    public function setRegistration(?Registration $registration): Token
+    {
+        $this->registration = $registration;
         return $this;
     }
 
