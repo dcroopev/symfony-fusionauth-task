@@ -26,3 +26,7 @@ services:
         arguments:
             - "8uMZPWqyB69hPNl7aT7ypN4brubSHzmKo4JNPJngYHLXONaZHsAZW7cU"  #todo configure as env variables
             - "http://localhost:9011"
+
+    App\EventListener\ExceptionListener:
+        tags:
+            - { name: kernel.event_listener, event: kernel.exception }

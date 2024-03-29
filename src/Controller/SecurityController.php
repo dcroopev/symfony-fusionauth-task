@@ -2,8 +2,8 @@
 
 namespace App\Controller;
 
-use App\DTO\LoginRequest;
-use App\DTO\Token;
+use App\DTO\Entity\Token;
+use App\DTO\Request\LoginRequest;
 use App\Filter\DtoSerializerFilter;
 use App\Service\FusionAuthResponseHandler;
 use App\Service\Serializer\DTOSerializer;
@@ -11,7 +11,6 @@ use FusionAuth\FusionAuthClient;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 
 class SecurityController extends AbstractController

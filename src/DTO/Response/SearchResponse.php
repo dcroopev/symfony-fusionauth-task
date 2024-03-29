@@ -1,6 +1,8 @@
 <?php
 
-namespace App\DTO;
+namespace App\DTO\Response;
+
+use App\DTO\Entity\User;
 
 class SearchResponse
 {

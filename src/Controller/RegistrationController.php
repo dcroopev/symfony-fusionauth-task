@@ -2,8 +2,8 @@
 
 namespace App\Controller;
 
-use App\DTO\RegistrationRequest;
-use App\DTO\Token;
+use App\DTO\Entity\Token;
+use App\DTO\Request\RegistrationRequest;
 use App\Filter\DtoSerializerFilter;
 use App\Service\FusionAuthResponseHandler;
 use App\Service\Serializer\DTOSerializer;
@@ -11,9 +11,7 @@ use FusionAuth\FusionAuthClient;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
-use Symfony\Component\Security\Http\Attribute\CurrentUser;
 
 class RegistrationController extends AbstractController
 {
@@ -72,10 +70,8 @@ class RegistrationController extends AbstractController
 
 
     #[Route('/api/user/registration/{userId}', name: 'registration-existing-user', methods: 'POST')]
-    public function registerExistingNewUser(
-        Request $request,
-        string $userId = null
-    ): JsonResponse {
+    public function registerExistingUser(Request $request, string $userId = null): JsonResponse
+    {
         $registrationRequest = $this->dtoSerializer->deserialize(
             $request->getContent(),
             RegistrationRequest::class,
@@ -119,16 +115,9 @@ class RegistrationController extends AbstractController
 
 
     #[Route('/api/user/registration', name: 'registration-delete', methods: 'DELETE')]
-    public function unregister(
-        Request $request,
-        #[CurrentUser] ?\App\Security\User $user
-    ): JsonResponse {
+    public function unregister(Request $request): JsonResponse
+    {
         $deleteRequest = $this->dtoSerializer->deserialize($request->getContent(), Token::class, 'json');
-
-        if ($deleteRequest->getUser()->getId() === $user->getId()) {
-            //todo throw error and handle in listener
-            return new JsonResponse(status: Response::HTTP_FORBIDDEN);
-        }
 
         $response = $this->client->deleteRegistration(
             $deleteRequest->getUser()->getId(),

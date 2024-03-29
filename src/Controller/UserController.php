@@ -2,12 +2,12 @@
 
 namespace App\Controller;
 
-use App\DTO\CreateUserRequest;
-use App\DTO\SearchRequest;
-use App\DTO\SearchResponse;
-use App\DTO\Token;
-use App\DTO\User;
+use App\DTO\Entity\{Token, User};
+use App\DTO\Request\{CreateUserRequest, SearchRequest};
+use App\DTO\Response\SearchResponse;
 use App\Filter\DtoSerializerFilter;
+use App\Service\Exception\ServiceException;
+use App\Service\Exception\ServiceExceptionData;
 use App\Service\FusionAuthResponseHandler;
 use App\Service\Serializer\DTOSerializer;
 use FusionAuth\FusionAuthClient;
@@ -91,8 +91,8 @@ class UserController extends AbstractController
         $deleteIdRequest = $serializer->deserialize($request->getContent(), User::class, 'json');
 
         if ($deleteIdRequest->getId() === $user->getId()) {
-            //todo throw error and handle in listener
-            return new JsonResponse(status: Response::HTTP_FORBIDDEN);
+            $exceptionData = new ServiceExceptionData(Response::HTTP_FORBIDDEN, "Self-delete Not Allowed");
+            throw new ServiceException($exceptionData);
         }
 
         $response = $this->client->deactivateUser($deleteIdRequest->getId());

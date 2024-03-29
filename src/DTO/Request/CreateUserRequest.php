@@ -1,6 +1,8 @@
 <?php
 
-namespace App\DTO;
+namespace App\DTO\Request;
+
+use App\DTO\Entity\User;
 
 class CreateUserRequest
 {
