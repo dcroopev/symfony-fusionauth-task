@@ -4,23 +4,22 @@ namespace App\DTO;
 
 class LoginRequest
 {
-    private ?string $username;
+    private ?string $loginId;
 
     private ?string $password;
 
     private ?string $applicationId;
 
-    public function getUsername(): ?string
+    public function getLoginId(): ?string
     {
-        return $this->username;
+        return $this->loginId;
     }
 
-    public function setUsername(?string $username): LoginRequest
+    public function setLoginId(?string $loginId): LoginRequest
     {
-        $this->username = $username;
+        $this->loginId = $loginId;
         return $this;
     }
-
 
     public function getPassword(): ?string
     {

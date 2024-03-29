@@ -3,7 +3,12 @@
 namespace App\Controller;
 
 use App\DTO\CreateUserRequest;
+use App\DTO\SearchRequest;
+use App\DTO\SearchResponse;
+use App\DTO\Token;
 use App\DTO\User;
+use App\Filter\DtoSerializerFilter;
+use App\Service\FusionAuthResponseHandler;
 use App\Service\Serializer\DTOSerializer;
 use FusionAuth\FusionAuthClient;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -16,7 +21,9 @@ use Symfony\Component\Security\Http\Attribute\CurrentUser;
 class UserController extends AbstractController
 {
     public function __construct(
-        private FusionAuthClient $client
+        private FusionAuthClient $client,
+        private FusionAuthResponseHandler $fusionAuthResponseHandler,
+        private DtoSerializerFilter $dtoSerializerFilter,
     ) {
     }
 
@@ -27,12 +34,10 @@ class UserController extends AbstractController
         //todo implement jwt retrieval if loginId is not provided
         $emailRequest = $serializer->deserialize($request->getContent(), User::class, 'json');
 
-        $result = $this->client->retrieveUserByLoginId($emailRequest->getEmail());
+        $responseData = $this->client->retrieveUserByLoginId($emailRequest->getEmail());
+        $responseData = $this->fusionAuthResponseHandler->handle($responseData);
 
-        if (!$result->wasSuccessful()) { //todo error handling
-            return new JsonResponse($result, $result->status);
-        }
-        $responseContent = $serializer->serialize($result->successResponse, 'json');
+        $responseContent = $this->dtoSerializerFilter->filter($responseData->user, User::class);
 
         return new JsonResponse(data: $responseContent, status: Response::HTTP_OK, json: true);
     }
@@ -42,19 +47,16 @@ class UserController extends AbstractController
     public function createUser(DTOSerializer $serializer, Request $request): JsonResponse
     {
         $createUserRequest = $serializer->deserialize($request->getContent(), CreateUserRequest::class, 'json');
-
         $createUserRequestArray = $serializer->toArray($createUserRequest);;
 
-        $result = $this->client->createUser(null, $createUserRequestArray);
+        $responseData = $this->client->createUser(null, $createUserRequestArray);
+        $responseData = $this->fusionAuthResponseHandler->handle($responseData);
 
-        if (!$result->wasSuccessful()) { //todo error handling
-            return new JsonResponse($result, $result->status);
-        }
-
-        $responseContent = $serializer->serialize($result->successResponse, 'json');
+        $responseContent = $this->dtoSerializerFilter->filter($responseData, Token::class);
 
         return new JsonResponse(data: $responseContent, status: Response::HTTP_OK, json: true);
     }
+
 
     #[Route('/api/user', name: 'user-update', methods: ['PUT', 'PATCH'])]
     public function updateUser(DTOSerializer $serializer, Request $request): JsonResponse
@@ -62,50 +64,44 @@ class UserController extends AbstractController
         $createUserRequest = $serializer->deserialize($request->getContent(), User::class, 'json');
 
         $createUserRequestArray = ['user' => $serializer->toArray($createUserRequest)];
-        $result = $this->client->updateUser($createUserRequest->getId(), $createUserRequestArray);
+        $responseData = $this->client->updateUser($createUserRequest->getId(), $createUserRequestArray);
 
-        if (!$result->wasSuccessful()) { //todo error handling
-            return new JsonResponse($result, $result->status);
-        }
-
-        $responseContent = $serializer->serialize($result->successResponse, 'json');
+        $responseData = $this->fusionAuthResponseHandler->handle($responseData);
+        $responseContent = $this->dtoSerializerFilter->filter($responseData->user, User::class);
 
         return new JsonResponse(data: $responseContent, status: Response::HTTP_OK, json: true);
     }
 
+
     #[Route('/api/user', name: 'user-delete', methods: 'DELETE')]
-    public function deleteUser(DTOSerializer $serializer, Request $request, #[CurrentUser] ?\App\Security\User $user): JsonResponse
-    {
+    public function deleteUser(
+        DTOSerializer $serializer,
+        Request $request,
+        #[CurrentUser] ?\App\Security\User $user
+    ): JsonResponse {
         $deleteIdRequest = $serializer->deserialize($request->getContent(), User::class, 'json');
-        if ($deleteIdRequest->getId() === $user->getId()){
+
+        if ($deleteIdRequest->getId() === $user->getId()) {
             return new JsonResponse(status: Response::HTTP_FORBIDDEN);
         }
 
-        $result = $this->client->deactivateUser($deleteIdRequest->getId());
-        if (!$result->wasSuccessful()) { //todo error handling
-            return new JsonResponse($result, $result->status);
-        }
+        $responseData = $this->client->deactivateUser($deleteIdRequest->getId());
+        $responseData = $this->fusionAuthResponseHandler->handle($responseData);
 
         return new JsonResponse(status: Response::HTTP_OK);
     }
 
+
     #[Route('/api/user/search', name: 'search', methods: 'POST')]
-    public function searchUserByQuery()
+    public function searchUserByQuery(Request $request, DTOSerializer $serializer): JsonResponse
     {
-        $temp = [
-            "search" => [
-                "numberOfResults" => 25,
-                "queryString" => "croopev",
-                "sortFields" => [
-                    [
-                        "name" => "email",
-                        "order" => "asc"
+        $searchRequest = $serializer->deserialize($request->getContent(), SearchRequest::class, 'json');
 
-                    ]
-                ]
-            ]
-        ];
+        $responseData = $this->client->searchUsersByQuery($searchRequest->toArray());
+        $responseData = $this->fusionAuthResponseHandler->handle($responseData);
 
-        $result2 = $this->client->searchUsersByQuery($temp);
+        $responseContent = $this->dtoSerializerFilter->filter($responseData, SearchResponse::class);
+
+        return new JsonResponse($responseContent, status: Response::HTTP_OK, json: true);
     }
 }

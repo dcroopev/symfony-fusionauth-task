@@ -18,6 +18,11 @@ class User
 
     private ?bool $active;
 
+    /**
+     * @var Registration[]|null
+     */
+    private ?array $registrations;
+
     public function getEmail(): ?string
     {
         return $this->email;
@@ -92,6 +97,17 @@ class User
     public function setActive(?bool $active): User
     {
         $this->active = $active;
+        return $this;
+    }
+
+    public function getRegistrations(): ?array
+    {
+        return $this->registrations;
+    }
+
+    public function setRegistrations(array $registrations): User
+    {
+        $this->registrations = $registrations;
         return $this;
     }
 

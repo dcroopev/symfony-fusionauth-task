@@ -3,6 +3,9 @@
 namespace App\Controller;
 
 use App\DTO\LoginRequest;
+use App\DTO\Token;
+use App\Filter\DtoSerializerFilter;
+use App\Service\FusionAuthResponseHandler;
 use App\Service\Serializer\DTOSerializer;
 use FusionAuth\FusionAuthClient;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -15,34 +18,24 @@ class SecurityController extends AbstractController
 {
 
     public function __construct(
-        private FusionAuthClient $client
+        private FusionAuthClient $client,
+        private FusionAuthResponseHandler $fusionAuthResponseHandler,
+        private DtoSerializerFilter $dtoSerializerFilter,
     ) {
     }
 
     #[Route('/api/login', name: 'login', methods: 'POST')]
-    public function login(Request $request, DTOSerializer $serializer)
+    public function login(Request $request, DTOSerializer $serializer): JsonResponse
     {
         $loginRequest = $serializer->deserialize($request->getContent(), LoginRequest::class, 'json');
+        $loginRequestArray = $serializer->toArray($loginRequest);
 
-        $authResult = $this->client->login([
-            "loginId" => $loginRequest->getUsername(),
-            "password" => $loginRequest->getPassword(),
-            "applicationId" => $loginRequest->getApplicationId(),
-        ]);
+        $responseData = $this->client->login($loginRequestArray);
+        $responseData = $this->fusionAuthResponseHandler->handle($responseData);
 
-        $responseContent = $serializer->serialize($authResult->successResponse, 'json');
+        $responseContent = $this->dtoSerializerFilter->filter($responseData, Token::class);
 
-        if (!$authResult->wasSuccessful()) { //todo error handling
-            return new JsonResponse(data: $responseContent, status: $authResult->status, json: true);
-        }
-
-        //todo return filtered token and user information
         return new JsonResponse(data: $responseContent, status: Response::HTTP_OK, json: true);
-    }
-
-    #[Route('/api/logout', name: 'logout', methods: 'POST')]
-    public function logout()
-    {
     }
 
 }
