@@ -102,7 +102,6 @@ class RegistrationController extends AbstractController
         $updateRequestArray = $this->dtoSerializer->toArray($updateRequest);
 
         $response = $this->client->updateRegistration($updateRequest->getUser()->getId(), $updateRequestArray);
-        dd($response);
         $response = $this->fusionAuthResponseHandler->handle($response);
 
         $responseData = $response->successResponse;

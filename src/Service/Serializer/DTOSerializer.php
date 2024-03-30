@@ -2,7 +2,6 @@
 
 namespace App\Service\Serializer;
 
-use App\Event\AfterDtoCreatedEvent;
 use App\Event\CreateDTOEvent;
 use Symfony\Component\PropertyInfo\Extractor\PhpDocExtractor;
 use Symfony\Component\PropertyInfo\Extractor\ReflectionExtractor;
