@@ -91,7 +91,7 @@ class RegistrationController extends AbstractController
     }
 
 
-    #[Route('/api/user/registration', name: 'registration-update', methods: ['PUT', 'PATCH'])]
+    #[Route('/api/user/registration', name: 'registration-update', methods: 'PUT')]
     public function updateRegistration(Request $request): JsonResponse
     {
         $updateRequest = $this->dtoSerializer->deserialize(

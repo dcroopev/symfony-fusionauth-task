@@ -17,6 +17,8 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Http\Attribute\CurrentUser;
+use OpenApi\Attributes as OA;
+use Nelmio\ApiDocBundle\Annotation\{Model, Security};
 
 class UserController extends AbstractController
 {
@@ -28,6 +30,24 @@ class UserController extends AbstractController
     }
 
 
+    #[OA\Tag(name: 'User')]
+    #[OA\RequestBody(
+        content: new OA\JsonContent(ref: new Model(type: User::class, groups: ['retrieve'])))
+    ]
+    #[OA\Response(
+        response: '200',
+        description: 'The request was successful',
+        content: new OA\JsonContent(
+            type: 'array',
+            items: new OA\Items(ref: new Model(type: User::class))
+        )
+    )]
+    #[OA\Response(response: '400', description: 'FusionAuthClientViolation error or `Bad Request` ')]
+    #[OA\Response(response: '401', description: 'Unauthorized request ')]
+    #[OA\Response(response: '404', description: 'The user was not found')]
+    #[OA\Response(response: '422', description: 'Constraint Violation Error')]
+    #[OA\Response(response: '500', description: 'Server Error')]
+    #[Security(name: 'Bearer')]
     #[Route('/api/user', name: 'user-retrieve', methods: 'GET')]
     public function retrieveUser(DTOSerializer $serializer, Request $request): JsonResponse
     {
@@ -45,7 +65,23 @@ class UserController extends AbstractController
         return new JsonResponse(data: $responseContent, status: $statusCode, json: true);
     }
 
-
+    #[OA\Tag(name: 'User')]
+    #[OA\RequestBody(
+        content: new OA\JsonContent(ref: new Model(type: CreateUserRequest::class, groups: ['create'])))
+    ]
+    #[OA\Response(
+        response: '200',
+        description: 'The request was successful',
+        content: new OA\JsonContent(
+            type: 'array',
+            items: new OA\Items(ref: new Model(type: Token::class))
+        )
+    )]
+    #[OA\Response(response: '400', description: 'FusionAuthClientViolation error or Bad Request')]
+    #[OA\Response(response: '401', description: 'Unauthorized request ')]
+    #[OA\Response(response: '422', description: 'Constraint Violation Error')]
+    #[OA\Response(response: '500', description: 'Server Error')]
+    #[Security(name: 'Bearer')]
     #[Route('/api/user', name: 'user-create', methods: 'POST')]
     public function createUser(DTOSerializer $serializer, Request $request): JsonResponse
     {
@@ -64,7 +100,25 @@ class UserController extends AbstractController
     }
 
 
-    #[Route('/api/user', name: 'user-update', methods: ['PUT', 'PATCH'])]
+    #[OA\Tag(name: 'User')]
+    #[OA\RequestBody(
+        content: new OA\JsonContent(ref: new Model(type: User::class, groups: ['update'])))
+    ]
+    #[OA\Response(
+        response: '200',
+        description: 'The request was successful',
+        content: new OA\JsonContent(
+            type: 'array',
+            items: new OA\Items(ref: new Model(type: Token::class))
+        )
+    )]
+    #[OA\Response(response: '400', description: 'FusionAuthClientViolation error or Bad Request')]
+    #[OA\Response(response: '401', description: 'Unauthorized request ')]
+    #[OA\Response(response: '404', description: 'The user was not found')]
+    #[OA\Response(response: '422', description: 'Constraint Violation Error')]
+    #[OA\Response(response: '500', description: 'Server Error')]
+    #[Security(name: 'Bearer')]
+    #[Route('/api/user', name: 'user-update', methods: 'PUT')]
     public function updateUser(DTOSerializer $serializer, Request $request): JsonResponse
     {
         $createUserRequest = $serializer->deserialize($request->getContent(), User::class, 'json');
@@ -81,7 +135,17 @@ class UserController extends AbstractController
         return new JsonResponse(data: $responseContent, status: $statusCode, json: true);
     }
 
-
+    #[OA\Tag(name: 'User')]
+    #[OA\RequestBody(
+        content: new OA\JsonContent(ref: new Model(type: User::class, groups: ['delete'])))
+    ]
+    #[OA\Response(response: '200', description: 'The request was successful')]
+    #[OA\Response(response: '400', description: 'FusionAuthClientViolation error or Bad Request')]
+    #[OA\Response(response: '401', description: 'Unauthorized request ')]
+    #[OA\Response(response: '404', description: 'The user was not found')]
+    #[OA\Response(response: '422', description: 'Constraint Violation Error')]
+    #[OA\Response(response: '500', description: 'Server Error')]
+    #[Security(name: 'Bearer')]
     #[Route('/api/user', name: 'user-delete', methods: 'DELETE')]
     public function deleteUser(
         DTOSerializer $serializer,
