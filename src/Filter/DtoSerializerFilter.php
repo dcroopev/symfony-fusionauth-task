@@ -13,7 +13,7 @@ class DtoSerializerFilter
 
     public function filter($responseData, string $dtoClassName, string $format = 'json'): string
     {
-        $filteredResponseData = $this->serializer->deserialize(json_encode($responseData), $dtoClassName, $format);
+        $filteredResponseData = $this->serializer->deserialize(json_encode($responseData), $dtoClassName, $format, validate: false);
         return $this->serializer->serialize($filteredResponseData, $format);
     }
 

@@ -2,11 +2,17 @@
 
 namespace App\DTO\Entity;
 
+use Symfony\Component\Validator\Constraints as Assert;
+
 class Token
 {
     private ?string $token;
     private ?int $tokenExpirationInstant;
+
+    #[Assert\Valid]
     private ?User $user;
+
+    #[Assert\Valid]
     private ?Registration $registration;
 
     public function getToken(): ?string

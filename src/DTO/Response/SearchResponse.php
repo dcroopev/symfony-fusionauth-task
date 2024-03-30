@@ -3,11 +3,13 @@
 namespace App\DTO\Response;
 
 use App\DTO\Entity\User;
+use Symfony\Component\Validator\Constraints as Assert;
 
 class SearchResponse
 {
     private ?string $nextResults;
 
+    #[Assert\PositiveOrZero]
     private ?int $total;
 
     /**

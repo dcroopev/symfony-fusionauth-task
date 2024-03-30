@@ -2,16 +2,24 @@
 
 namespace App\DTO\Entity;
 
+use Symfony\Component\Validator\Constraints as Assert;
+
 class User
 {
+    #[Assert\Uuid]
     private ?string $id;
 
+    #[Assert\Email]
     private ?string $email;
 
     private ?string $firstName;
 
     private ?string $lastName;
 
+    #[Assert\Length(
+        min: 8,
+        minMessage: 'Password cannot be less than {{ limit }} characters long',
+    )]
     private ?string $password;
 
     private ?string $birthDate;

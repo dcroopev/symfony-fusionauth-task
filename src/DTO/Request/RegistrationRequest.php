@@ -4,11 +4,14 @@ namespace App\DTO\Request;
 
 use App\DTO\Entity\Registration;
 use App\DTO\Entity\User;
+use Symfony\Component\Validator\Constraints as Assert;
 
 class RegistrationRequest
 {
+    #[Assert\Valid]
     private ?Registration $registration;
 
+    #[Assert\Valid]
     private ?User $user;
 
     public function getRegistration(): ?Registration

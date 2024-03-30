@@ -2,10 +2,14 @@
 
 namespace App\DTO\Entity;
 
+use Symfony\Component\Validator\Constraints as Assert;
+
 class Registration
 {
+    #[Assert\Uuid]
     private ?string $id;
 
+    #[Assert\Uuid]
     private ?string $applicationId;
 
     private ?string $username;

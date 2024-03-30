@@ -2,8 +2,11 @@
 
 namespace App\DTO\Request;
 
+use Symfony\Component\Validator\Constraints as Assert;
+
 class SearchRequest
 {
+    #[Assert\Positive]
     private ?int $numberOfResults;
 
     private ?string $queryString;
@@ -12,6 +15,7 @@ class SearchRequest
 
     private ?string $order = 'asc';
 
+    #[Assert\PositiveOrZero]
     private ?int $startRow;
 
     private ?string $nextResults;

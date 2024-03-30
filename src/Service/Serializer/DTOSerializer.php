@@ -2,6 +2,8 @@
 
 namespace App\Service\Serializer;
 
+use App\Event\AfterDtoCreatedEvent;
+use App\Event\CreateDTOEvent;
 use Symfony\Component\PropertyInfo\Extractor\PhpDocExtractor;
 use Symfony\Component\PropertyInfo\Extractor\ReflectionExtractor;
 use Symfony\Component\PropertyInfo\PropertyInfoExtractor;
@@ -12,11 +14,12 @@ use Symfony\Component\Serializer\Normalizer\ArrayDenormalizer;
 use Symfony\Component\Serializer\Normalizer\ObjectNormalizer;
 use Symfony\Component\Serializer\Serializer;
 use Symfony\Component\Serializer\SerializerInterface;
+use Symfony\Contracts\EventDispatcher\EventDispatcherInterface;
 
 class DTOSerializer implements SerializerInterface
 {
 
-    public function __construct()
+    public function __construct(private EventDispatcherInterface $eventDispatcher)
     {
         $this->serializer = new Serializer(
             normalizers: [
@@ -38,12 +41,13 @@ class DTOSerializer implements SerializerInterface
         return $this->serializer->serialize($data, $format, $context);
     }
 
-    public function deserialize(mixed $data, string $type, string $format, array $context = []): mixed
+    public function deserialize(mixed $data, string $type, string $format, array $context = [], bool $validate = true): mixed
     {
         $dto = $this->serializer->deserialize($data, $type, $format, $context);
 
-        //todo inject event dispatcher and create event to validate DTOs on attributes (assertions)
-
+        if ($validate) {
+            $event = new CreateDTOEvent($dto);
+            $this->eventDispatcher->dispatch($event, $event::NAME);        }
         return $dto;
     }
 

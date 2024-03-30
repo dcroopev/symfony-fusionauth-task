@@ -3,11 +3,14 @@
 namespace App\DTO\Request;
 
 use App\DTO\Entity\User;
+use Symfony\Component\Validator\Constraints as Assert;
 
 class CreateUserRequest
 {
-    private User $user;
+    #[Assert\Valid]
+    private ?User $user;
 
+    #[Assert\Uuid]
     private ?string $applicationId;
 
     public function getUser(): User
