@@ -2,23 +2,32 @@
 
 namespace App\DTO\Request;
 
+use Symfony\Component\Serializer\Attribute\Groups;
 use Symfony\Component\Validator\Constraints as Assert;
 
 class SearchRequest
 {
+    #[Groups(['next-result'])]
+    #[Assert\NotBlank(groups: ['next-result'])]
+    private ?string $nextResults;
+
+    #[Groups(['query'])]
+    #[Assert\NotBlank(groups: ['query'])]
+    private ?string $queryString;
+
+    #[Groups(['query'])]
+    private ?string $sortField;
+
+    #[Groups(['query'])]
+    private ?string $order = 'asc';
+
+    #[Groups(['query', 'next-result'])]
     #[Assert\Positive]
     private ?int $numberOfResults;
 
-    private ?string $queryString;
-
-    private ?string $sortField;
-
-    private ?string $order = 'asc';
-
+    #[Groups(['query', 'next-result'])]
     #[Assert\PositiveOrZero]
     private ?int $startRow;
-
-    private ?string $nextResults;
 
     public function getNumberOfResults(): ?int
     {

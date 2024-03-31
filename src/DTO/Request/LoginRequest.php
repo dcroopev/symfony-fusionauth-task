@@ -6,8 +6,11 @@ use Symfony\Component\Validator\Constraints as Assert;
 
 class LoginRequest
 {
+    #[Assert\NotBlank]
+    #[Assert\Email]
     private ?string $loginId;
 
+    #[Assert\NotBlank]
     #[Assert\Length(
         min: 8,
         minMessage: 'Password cannot be less than {{ limit }} characters long',

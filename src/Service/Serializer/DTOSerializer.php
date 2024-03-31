@@ -2,7 +2,6 @@
 
 namespace App\Service\Serializer;
 
-use App\Event\AfterDtoCreatedEvent;
 use App\Event\CreateDTOEvent;
 use Symfony\Component\PropertyInfo\Extractor\PhpDocExtractor;
 use Symfony\Component\PropertyInfo\Extractor\ReflectionExtractor;
@@ -41,13 +40,19 @@ class DTOSerializer implements SerializerInterface
         return $this->serializer->serialize($data, $format, $context);
     }
 
-    public function deserialize(mixed $data, string $type, string $format, array $context = [], bool $validate = true): mixed
-    {
+    public function deserialize(
+        mixed $data,
+        string $type,
+        string $format,
+        array $context = [],
+        bool $validate = true
+    ): mixed {
         $dto = $this->serializer->deserialize($data, $type, $format, $context);
 
         if ($validate) {
             $event = new CreateDTOEvent($dto);
-            $this->eventDispatcher->dispatch($event, $event::NAME);        }
+            $this->eventDispatcher->dispatch($event, $event::NAME);
+        }
         return $dto;
     }
 

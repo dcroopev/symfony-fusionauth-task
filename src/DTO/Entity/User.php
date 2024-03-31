@@ -2,26 +2,39 @@
 
 namespace App\DTO\Entity;
 
+use Symfony\Component\Serializer\Attribute\Groups;
 use Symfony\Component\Validator\Constraints as Assert;
 
 class User
 {
+    #[Groups(['update', 'delete', 'registration-retrieve', 'registration-existing-user', 'registration-update'])]
+    #[Assert\NotBlank(groups: ['update', 'delete', 'registration-retrieve', 'registration-existing-user', 'registration-update'])]
     #[Assert\Uuid]
     private ?string $id;
 
+    #[Groups(['create', 'retrieve', 'update', 'registration-new-user'])]
+    #[Assert\NotBlank(groups: ['create', 'retrieve', 'update', 'registration-new-user'])]
     #[Assert\Email]
     private ?string $email;
 
-    private ?string $firstName;
 
-    private ?string $lastName;
-
+    #[Groups(['create', 'update', 'registration-new-user'])]
+    #[Assert\NotBlank(groups: ['create', 'registration-new-user'])]
     #[Assert\Length(
         min: 8,
         minMessage: 'Password cannot be less than {{ limit }} characters long',
     )]
     private ?string $password;
 
+
+    #[Groups(['create', 'update', 'registration-new-user'])]
+    private ?string $firstName;
+
+
+    #[Groups(['create', 'update', 'registration-new-user'])]
+    private ?string $lastName;
+
+    #[Groups(['create', 'update', 'registration-new-user'])]
     private ?string $birthDate;
 
     private ?bool $active;

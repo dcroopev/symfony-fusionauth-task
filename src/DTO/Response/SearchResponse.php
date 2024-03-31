@@ -9,7 +9,6 @@ class SearchResponse
 {
     private ?string $nextResults;
 
-    #[Assert\PositiveOrZero]
     private ?int $total;
 
     /**
