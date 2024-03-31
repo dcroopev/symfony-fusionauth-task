@@ -11,10 +11,15 @@ class DtoSerializerFilter
     {
     }
 
-    public function filter($responseData, string $dtoClassName, string $format = 'json'): string
+    public function filter(mixed $responseData, string $dtoClassName): string
     {
-        $filteredResponseData = $this->serializer->deserialize(json_encode($responseData), $dtoClassName, $format, validate: false);
-        return $this->serializer->serialize($filteredResponseData, $format);
+        $filteredResponseData = $this->serializer->deserialize(
+            json_encode($responseData),
+            $dtoClassName,
+            format: 'json',
+            validate: false
+        );
+        return $this->serializer->serialize($filteredResponseData, format: 'json');
     }
 
 }

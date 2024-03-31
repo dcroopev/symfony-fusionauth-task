@@ -56,7 +56,7 @@ class User
     /**
      * @var Registration[]|null
      */
-    private ?array $registrations;
+    protected ?array $registrations;
 
     public function getEmail(): ?string
     {

@@ -3,40 +3,18 @@
 namespace App\Security;
 
 use Symfony\Component\Security\Core\User\UserInterface;
+use App\DTO\Entity\User as UserDTO;
 
 class User implements UserInterface
 {
-    private string $id;
 
-    private string $email;
-
-    public function getId(): string
-    {
-        return $this->id;
-    }
-
-    public function setId(string $id): User
-    {
-        $this->id = $id;
-        return $this;
-    }
+    private ?UserDTO $userDto;
 
     /**
      * @var list<string> The user roles
      */
     private array $roles = [];
 
-    public function getEmail(): ?string
-    {
-        return $this->email;
-    }
-
-    public function setEmail(string $email): static
-    {
-        $this->email = $email;
-
-        return $this;
-    }
 
     /**
      * A visual identifier that represents this user.
@@ -45,13 +23,13 @@ class User implements UserInterface
      */
     public function getUserIdentifier(): string
     {
-        return (string) $this->email;
+        return (string)$this->getUserDto()->getEmail();
     }
 
     /**
+     * @return list<string>
      * @see UserInterface
      *
-     * @return list<string>
      */
     public function getRoles(): array
     {
@@ -80,4 +58,16 @@ class User implements UserInterface
         // If you store any temporary, sensitive data on the user, clear it here
         // $this->plainPassword = null;
     }
+
+    public function getUserDto(): ?UserDTO
+    {
+        return $this->userDto;
+    }
+
+    public function setUserDto(?UserDTO $userDto): User
+    {
+        $this->userDto = $userDto;
+        return $this;
+    }
+
 }

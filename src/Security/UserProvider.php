@@ -2,6 +2,8 @@
 
 namespace App\Security;
 
+use App\Filter\DtoSerializerFilter;
+use App\Service\Serializer\DTOSerializer;
 use FusionAuth\FusionAuthClient;
 use Symfony\Component\Security\Core\Exception\UnsupportedUserException;
 use Symfony\Component\Security\Core\Exception\UserNotFoundException;
@@ -9,11 +11,14 @@ use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 use Symfony\Component\Security\Core\User\PasswordUpgraderInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
 use Symfony\Component\Security\Core\User\UserProviderInterface;
+use App\DTO\Entity\User as UserDTO;
 
 class UserProvider implements UserProviderInterface, PasswordUpgraderInterface
 {
     public function __construct(
-        private FusionAuthClient $fusionAuthClient
+        private FusionAuthClient $fusionAuthClient,
+        private DTOSerializer $dtoSerializer,
+        private DtoSerializerFilter $dtoSerializerFilter,
     ) {
     }
 
@@ -28,14 +33,22 @@ class UserProvider implements UserProviderInterface, PasswordUpgraderInterface
      */
     public function loadUserByIdentifier($identifier): UserInterface
     {
-        $result = $this->fusionAuthClient->retrieveUserByEmail($identifier);
+        $response = $this->fusionAuthClient->retrieveUserByEmail($identifier);
 
-        if (!$result->wasSuccessful()) {
+        if (!$response->wasSuccessful()) {
             throw new UserNotFoundException();
         }
+
+        $responseData = $response->successResponse;
+        $userDto = $this->dtoSerializer->deserialize(
+            json_encode($responseData->user),
+            UserDTO::class,
+            'json',
+            validate: false
+        );
+
         $user = new User();
-        $user->setEmail($identifier);
-        $user->setId($result->successResponse->user->id);
+        $user->setUserDto($userDto);
 
         return $user;
     }
@@ -54,7 +67,7 @@ class UserProvider implements UserProviderInterface, PasswordUpgraderInterface
             throw new UnsupportedUserException(sprintf('Invalid user class "%s".', $user::class));
         }
 
-       return $user;
+        return $user;
     }
 
     /**
