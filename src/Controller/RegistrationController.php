@@ -38,9 +38,9 @@ class RegistrationController extends AbstractController
             type: 'array',
             items: new OA\Items(
                 ref: new Model(
-                type: RegistrationRequest::class,
-                groups: ['registration-retrieve-response']
-            )
+                    type: RegistrationRequest::class,
+                    groups: ['registration-retrieve-response']
+                )
             )
         )
     )]
@@ -56,7 +56,8 @@ class RegistrationController extends AbstractController
         $retrieveRequest = $this->dtoSerializer->deserialize(
             $request->getContent(),
             RegistrationRequest::class,
-            'json'
+            'json',
+            validationGroups: ['registration-retrieve']
         );
         $response = $this->client->retrieveRegistration(
             $retrieveRequest->getUser()->getId(),
@@ -141,9 +142,9 @@ class RegistrationController extends AbstractController
             type: 'array',
             items: new OA\Items(
                 ref: new Model(
-                type: RegistrationRequest::class,
-                groups: ['registration-retrieve-response']
-            )
+                    type: RegistrationRequest::class,
+                    groups: ['registration-retrieve-response']
+                )
             )
         )
     )]
@@ -159,10 +160,10 @@ class RegistrationController extends AbstractController
         $updateRequest = $this->dtoSerializer->deserialize(
             $request->getContent(),
             RegistrationRequest::class,
-            'json'
+            'json',
+            validationGroups: ['registration-update']
         );
         $updateRequestArray = $this->dtoSerializer->toArray($updateRequest);
-
         $response = $this->client->updateRegistration($updateRequest->getUser()->getId(), $updateRequestArray);
         $response = $this->fusionAuthResponseHandler->handle($response);
 
@@ -176,7 +177,9 @@ class RegistrationController extends AbstractController
 
     #[OA\Tag(name: 'Registration')]
     #[OA\RequestBody(
-        content: new OA\JsonContent(ref: new Model(type: RegistrationRequest::class, groups: ['registration-retrieve'])))
+        content: new OA\JsonContent(
+            ref: new Model(type: RegistrationRequest::class, groups: ['registration-retrieve'])
+        ))
     ]
     #[OA\Response(response: '200', description: 'The request was successful')]
     #[OA\Response(response: '400', description: 'FusionAuthClientViolation error or Bad Request')]
@@ -188,7 +191,12 @@ class RegistrationController extends AbstractController
     #[Route('/api/user/registration', name: 'registration-delete', methods: 'DELETE')]
     public function unregister(Request $request): JsonResponse
     {
-        $deleteRequest = $this->dtoSerializer->deserialize($request->getContent(), RegistrationRequest::class, 'json');
+        $deleteRequest = $this->dtoSerializer->deserialize(
+            $request->getContent(),
+            RegistrationRequest::class,
+            'json',
+            validationGroups: ['registration-retrieve']
+        );
 
         $response = $this->client->deleteRegistration(
             $deleteRequest->getUser()->getId(),

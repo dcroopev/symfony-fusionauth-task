@@ -8,13 +8,26 @@ use Symfony\Component\Validator\Constraints as Assert;
 class User
 {
     #[Groups(['update', 'delete', 'registration-retrieve', 'registration-existing-user', 'registration-update'])]
-    #[Assert\NotBlank(groups: ['update', 'delete', 'registration-retrieve', 'registration-existing-user', 'registration-update'])]
-    #[Assert\Uuid]
+    #[Assert\NotBlank(groups: [
+        'update',
+        'delete',
+        'registration-retrieve',
+        'registration-existing-user',
+        'registration-update'
+    ])]
+    #[Assert\Uuid(groups: [
+        'update',
+        'delete',
+        'registration-retrieve',
+        'registration-existing-user',
+        'registration-update'
+    ])]
     private ?string $id = null;
+
 
     #[Groups(['create', 'retrieve', 'update', 'registration-new-user'])]
     #[Assert\NotBlank(groups: ['create', 'retrieve', 'update', 'registration-new-user'])]
-    #[Assert\Email]
+    #[Assert\Email(groups: ['create', 'retrieve', 'update', 'registration-new-user'])]
     private ?string $email;
 
 
@@ -23,6 +36,7 @@ class User
     #[Assert\Length(
         min: 8,
         minMessage: 'Password cannot be less than {{ limit }} characters long',
+        groups: ['create', 'update', 'registration-new-user']
     )]
     private ?string $password;
 

@@ -9,11 +9,11 @@ class SearchRequest
 {
     #[Groups(['next-result'])]
     #[Assert\NotBlank(groups: ['next-result'])]
-    private ?string $nextResults;
+    private ?string $nextResults = null;
 
     #[Groups(['query'])]
     #[Assert\NotBlank(groups: ['query'])]
-    private ?string $queryString;
+    private ?string $queryString = null;
 
     #[Groups(['query'])]
     private ?string $sortField;
@@ -22,11 +22,11 @@ class SearchRequest
     private ?string $order = 'asc';
 
     #[Groups(['query', 'next-result'])]
-    #[Assert\Positive]
+    #[Assert\Positive(groups: ['query', 'next-result'])]
     private ?int $numberOfResults;
 
     #[Groups(['query', 'next-result'])]
-    #[Assert\PositiveOrZero]
+    #[Assert\PositiveOrZero(groups: ['query', 'next-result'])]
     private ?int $startRow;
 
     public function getNumberOfResults(): ?int

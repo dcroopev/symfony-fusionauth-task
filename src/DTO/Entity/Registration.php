@@ -7,22 +7,54 @@ use Symfony\Component\Validator\Constraints as Assert;
 
 class Registration
 {
-    #[Assert\Uuid]
     #[Groups(['registration-retrieve-response'])]
     private ?string $id;
 
-    #[Groups(['registration-retrieve', 'registration-new-user', 'registration-existing-user', 'registration-update', 'registration-retrieve-response'])]
-    #[Assert\NotBlank(groups: ['registration-retrieve', 'registration-new-user', 'registration-existing-user', 'registration-update'])]
-    #[Assert\Uuid]
+    #[Groups([
+        'registration-retrieve',
+        'registration-new-user',
+        'registration-existing-user',
+        'registration-update',
+        'registration-retrieve-response'
+    ])]
+    #[Assert\NotBlank(groups: [
+        'registration-retrieve',
+        'registration-new-user',
+        'registration-existing-user',
+        'registration-update'
+    ])]
+    #[Assert\Uuid(groups: [
+        'registration-retrieve',
+        'registration-new-user',
+        'registration-existing-user',
+        'registration-update',
+        'registration-retrieve-response'
+    ])]
     private ?string $applicationId;
 
-    #[Groups(['registration-new-user', 'registration-existing-user', 'registration-update', 'registration-retrieve-response'])]
+
+    #[Groups([
+        'registration-new-user',
+        'registration-existing-user',
+        'registration-update',
+        'registration-retrieve-response'
+    ])]
     private ?string $username;
 
-    #[Groups(['registration-new-user', 'registration-existing-user', 'registration-update', 'registration-retrieve-response'])]
+    #[Groups([
+        'registration-new-user',
+        'registration-existing-user',
+        'registration-update',
+        'registration-retrieve-response'
+    ])]
     private ?array $roles;
 
-    #[Groups(['registration-new-user', 'registration-existing-user', 'registration-update' ,'registration-retrieve-response'])]
+    #[Groups([
+        'registration-new-user',
+        'registration-existing-user',
+        'registration-update',
+        'registration-retrieve-response'
+    ])]
     private ?array $data;
 
     public function getId(): ?string

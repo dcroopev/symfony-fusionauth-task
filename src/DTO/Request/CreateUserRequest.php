@@ -13,7 +13,7 @@ class CreateUserRequest
     private ?User $user;
 
     #[Groups(['create'])]
-    #[Assert\Uuid]
+    #[Assert\Uuid(groups: ['create'])]
     private ?string $applicationId;
 
     public function getUser(): User

@@ -46,12 +46,12 @@ class DTOSerializer implements SerializerInterface
         string $format,
         array $context = [],
         bool $validate = true,
-        string|array|null $groups = null
+        array|string|null $validationGroups = null
     ): mixed {
         $dto = $this->serializer->deserialize($data, $type, $format, $context);
 
         if ($validate) {
-            $this->validateDto($dto, $groups);
+            $this->validateDto($dto, $validationGroups);
         }
         return $dto;
     }

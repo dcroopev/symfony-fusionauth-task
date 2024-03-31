@@ -53,7 +53,12 @@ class UserController extends AbstractController
     public function retrieveUser(DTOSerializer $serializer, Request $request): JsonResponse
     {
         //todo implement jwt retrieval if loginId is not provided
-        $emailRequest = $serializer->deserialize($request->getContent(), User::class, 'json');
+        $emailRequest = $serializer->deserialize(
+            $request->getContent(),
+            User::class,
+            'json',
+            validationGroups: ['retrieve']
+        );
 
         $response = $this->client->retrieveUserByLoginId($emailRequest->getEmail());
         $response = $this->fusionAuthResponseHandler->handle($response);
@@ -86,7 +91,12 @@ class UserController extends AbstractController
     #[Route('/api/user', name: 'user-create', methods: 'POST')]
     public function createUser(DTOSerializer $serializer, Request $request): JsonResponse
     {
-        $createUserRequest = $serializer->deserialize($request->getContent(), CreateUserRequest::class, 'json');
+        $createUserRequest = $serializer->deserialize(
+            $request->getContent(),
+            CreateUserRequest::class,
+            'json',
+            validationGroups: ['create']
+        );
         $createUserRequestArray = $serializer->toArray($createUserRequest);;
 
         $response = $this->client->createUser(null, $createUserRequestArray);
@@ -122,7 +132,12 @@ class UserController extends AbstractController
     #[Route('/api/user', name: 'user-update', methods: 'PUT')]
     public function updateUser(DTOSerializer $serializer, Request $request): JsonResponse
     {
-        $createUserRequest = $serializer->deserialize($request->getContent(), User::class, 'json');
+        $createUserRequest = $serializer->deserialize(
+            $request->getContent(),
+            User::class,
+            'json',
+            validationGroups: ['update']
+        );
 
         $createUserRequestArray = ['user' => $serializer->toArray($createUserRequest)];
         $response = $this->client->updateUser($createUserRequest->getId(), $createUserRequestArray);
@@ -154,7 +169,10 @@ class UserController extends AbstractController
         Request $request,
         #[CurrentUser] ?\App\Security\User $user
     ): JsonResponse {
-        $deleteIdRequest = $serializer->deserialize($request->getContent(), User::class, 'json');
+        $deleteIdRequest = $serializer->deserialize(
+            $request->getContent(), User::class, 'json',
+            validationGroups: ['delete']
+        );
 
         if ($deleteIdRequest->getId() === $user->getId()) {
             $exceptionData = new ServiceExceptionData(Response::HTTP_FORBIDDEN, "Self-delete Not Allowed");
@@ -174,8 +192,8 @@ class UserController extends AbstractController
     #[OA\Tag(name: 'User')]
     #[OA\RequestBody(
         content: new OA\JsonContent(oneOf: [
-           new OA\Schema(ref: new Model(type: SearchRequest::class, groups: ['query'])),
-           new OA\Schema(ref: new Model(type: SearchRequest::class, groups: ['next-result']))
+            new OA\Schema(ref: new Model(type: SearchRequest::class, groups: ['query'])),
+            new OA\Schema(ref: new Model(type: SearchRequest::class, groups: ['next-result']))
         ]))
     ]
     #[OA\Response(
@@ -193,9 +211,20 @@ class UserController extends AbstractController
     #[OA\Response(response: '500', description: 'Server Error')]
     #[Security(name: 'Bearer')]
     #[Route('/api/user/search', name: 'search', methods: 'POST')]
-    public function searchUserByQuery(Request $request, DTOSerializer $serializer): JsonResponse
+    public function searchUser(Request $request, DTOSerializer $serializer): JsonResponse
     {
-        $searchRequest = $serializer->deserialize($request->getContent(), SearchRequest::class, 'json');
+        $searchRequest = $serializer->deserialize(
+            $request->getContent(),
+            SearchRequest::class,
+            'json',
+            validate: false
+        );
+
+        if ($searchRequest->getNextResults()) {
+            $searchRequest = $serializer->validateDto($searchRequest, 'next-result');
+        } else {
+            $searchRequest = $serializer->validateDto($searchRequest, 'query');
+        }
 
         $response = $this->client->searchUsersByQuery($searchRequest->toArray());
         $response = $this->fusionAuthResponseHandler->handle($response);
