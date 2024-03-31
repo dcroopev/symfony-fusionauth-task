@@ -7,19 +7,19 @@ use Symfony\Component\Validator\Constraints as Assert;
 
 class User
 {
-    #[Groups(['update', 'delete'])]
-    #[Assert\NotBlank(groups: ['update', 'delete'])]
+    #[Groups(['update', 'delete', 'registration-retrieve', 'registration-existing-user', 'registration-update'])]
+    #[Assert\NotBlank(groups: ['update', 'delete', 'registration-retrieve', 'registration-existing-user', 'registration-update'])]
     #[Assert\Uuid]
     private ?string $id;
 
-    #[Groups(['create', 'retrieve', 'update'])]
-    #[Assert\NotBlank(groups: ['create', 'retrieve', 'update'])]
+    #[Groups(['create', 'retrieve', 'update', 'registration-new-user'])]
+    #[Assert\NotBlank(groups: ['create', 'retrieve', 'update', 'registration-new-user'])]
     #[Assert\Email]
     private ?string $email;
 
 
-    #[Groups(['create', 'update'])]
-    #[Assert\NotBlank(groups: ['create'])]
+    #[Groups(['create', 'update', 'registration-new-user'])]
+    #[Assert\NotBlank(groups: ['create', 'registration-new-user'])]
     #[Assert\Length(
         min: 8,
         minMessage: 'Password cannot be less than {{ limit }} characters long',
@@ -27,14 +27,14 @@ class User
     private ?string $password;
 
 
-    #[Groups(['create', 'update'])]
+    #[Groups(['create', 'update', 'registration-new-user'])]
     private ?string $firstName;
 
 
-    #[Groups(['create', 'update'])]
+    #[Groups(['create', 'update', 'registration-new-user'])]
     private ?string $lastName;
 
-    #[Groups(['create', 'update'])]
+    #[Groups(['create', 'update', 'registration-new-user'])]
     private ?string $birthDate;
 
     private ?bool $active;

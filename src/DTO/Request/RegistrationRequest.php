@@ -5,12 +5,18 @@ namespace App\DTO\Request;
 use App\DTO\Entity\Registration;
 use App\DTO\Entity\User;
 use Symfony\Component\Validator\Constraints as Assert;
+use Symfony\Component\Serializer\Attribute\Groups;
 
 class RegistrationRequest
 {
+
+    #[Groups(['registration-new-user', 'registration-existing-user', 'registration-update', 'registration-retrieve', 'registration-retrieve-response'])]
+    #[Assert\NotBlank(groups: ['registration-new-user', 'registration-existing-user', 'registration-update', 'registration-retrieve'])]
     #[Assert\Valid]
     private ?Registration $registration;
 
+    #[Groups(['registration-new-user', 'registration-existing-user', 'registration-update', 'registration-retrieve'])]
+    #[Assert\NotBlank(groups: ['registration-new-user', 'registration-existing-user', 'registration-update', 'registration-retrieve'])]
     #[Assert\Valid]
     private ?User $user;
 

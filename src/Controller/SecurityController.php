@@ -2,18 +2,18 @@
 
 namespace App\Controller;
 
-use App\DTO\Entity\Token;
 use App\DTO\Request\LoginRequest;
+use App\DTO\Response\Token;
 use App\Filter\DtoSerializerFilter;
 use App\Service\FusionAuthResponseHandler;
 use App\Service\Serializer\DTOSerializer;
 use FusionAuth\FusionAuthClient;
+use Nelmio\ApiDocBundle\Annotation\{Model};
+use OpenApi\Attributes as OA;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Attribute\Route;
-use OpenApi\Attributes as OA;
-use Nelmio\ApiDocBundle\Annotation\{Model};
 
 class SecurityController extends AbstractController
 {
@@ -43,7 +43,7 @@ class SecurityController extends AbstractController
         )
     )]
     #[OA\Response(response: '400', description: 'FusionAuthClientViolation error or `Bad Request` ')]
-    #[OA\Response(response: '404', description: 'The user was not found or the password was incorrect.')]
+    #[OA\Response(response: '404', description: 'Incorrect user/password')]
     #[OA\Response(response: '422', description: 'Constraint Violation Error')]
     #[OA\Response(response: '423', description: 'User is Locked')]
     #[OA\Response(response: '500', description: 'Server Error')]
