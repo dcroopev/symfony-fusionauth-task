@@ -6,12 +6,38 @@ use App\DTO\Entity\{Registration, User};
 
 class Token
 {
+    private ?string $refreshToken;
+    private ?string $refreshTokenId;
+
     private ?string $token;
     private ?int $tokenExpirationInstant;
 
     private ?User $user;
 
     private ?Registration $registration;
+
+
+    public function getRefreshToken(): ?string
+    {
+        return $this->refreshToken;
+    }
+
+    public function setRefreshToken(?string $refreshToken): Token
+    {
+        $this->refreshToken = $refreshToken;
+        return $this;
+    }
+
+    public function getRefreshTokenId(): ?string
+    {
+        return $this->refreshTokenId;
+    }
+
+    public function setRefreshTokenId(?string $refreshTokenId): Token
+    {
+        $this->refreshTokenId = $refreshTokenId;
+        return $this;
+    }
 
     public function getToken(): ?string
     {
