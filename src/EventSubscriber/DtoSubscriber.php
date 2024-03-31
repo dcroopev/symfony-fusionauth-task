@@ -2,7 +2,7 @@
 
 namespace App\EventSubscriber;
 
-use App\Event\CreateDTOEvent;
+use App\Event\ValidateDtoEvent;
 use App\Service\Exception\ServiceException;
 use App\Service\Exception\ValidationExceptionData;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
@@ -19,15 +19,16 @@ class DtoSubscriber implements EventSubscriberInterface
     public static function getSubscribedEvents(): array
     {
         return [
-            CreateDTOEvent::NAME => 'validate'
+            ValidateDtoEvent::NAME => 'validate'
         ];
     }
 
-    public function validate(CreateDTOEvent $event): void
+    public function validate(ValidateDtoEvent $event): void
     {
         $dto = $event->getDto();
+        $groups = $event->getGroups();
 
-        $errors = $this->validator->validate($dto);
+        $errors = $this->validator->validate($dto, groups: $groups);
 
         if (count($errors) > 0) {
             $validationExceptionData = new ValidationExceptionData(

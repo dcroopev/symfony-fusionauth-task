@@ -10,7 +10,7 @@ class User
     #[Groups(['update', 'delete', 'registration-retrieve', 'registration-existing-user', 'registration-update'])]
     #[Assert\NotBlank(groups: ['update', 'delete', 'registration-retrieve', 'registration-existing-user', 'registration-update'])]
     #[Assert\Uuid]
-    private ?string $id;
+    private ?string $id = null;
 
     #[Groups(['create', 'retrieve', 'update', 'registration-new-user'])]
     #[Assert\NotBlank(groups: ['create', 'retrieve', 'update', 'registration-new-user'])]

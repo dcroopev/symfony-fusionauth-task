@@ -28,14 +28,20 @@ class RegistrationController extends AbstractController
 
     #[OA\Tag(name: 'Registration')]
     #[OA\RequestBody(
-        content: new OA\JsonContent(ref: new Model(type: RegistrationRequest::class, groups: ['registration-retrieve'])))
+        content: new OA\JsonContent(ref: new Model(type: RegistrationRequest::class, groups: ['registration-retrieve'])
+        ))
     ]
     #[OA\Response(
         response: '200',
         description: 'The request was successful',
         content: new OA\JsonContent(
             type: 'array',
-            items: new OA\Items(ref: new Model(type: RegistrationRequest::class, groups: ['registration-retrieve-response']))
+            items: new OA\Items(
+                ref: new Model(
+                type: RegistrationRequest::class,
+                groups: ['registration-retrieve-response']
+            )
+            )
         )
     )]
     #[OA\Response(response: '400', description: 'FusionAuthClientViolation error or `Bad Request` ')]
@@ -94,11 +100,25 @@ class RegistrationController extends AbstractController
         $registrationRequest = $this->dtoSerializer->deserialize(
             $request->getContent(),
             RegistrationRequest::class,
-            'json'
+            'json',
+            validate: false
         );
+
+        $userId = $registrationRequest->getUser()->getId();
+
+        if ($userId) {
+            $registrationRequest = $this->dtoSerializer->validateDto(
+                $registrationRequest,
+                'registration-existing-user'
+            );
+            $registrationRequest->setUser(null);
+        } else {
+            $registrationRequest = $this->dtoSerializer->validateDto($registrationRequest, 'registration-new-user');
+        }
+
         $registrationRequestArray = $this->dtoSerializer->toArray($registrationRequest);
 
-        $response = $this->client->register(null, $registrationRequestArray);
+        $response = $this->client->register($userId, $registrationRequestArray);
         $response = $this->fusionAuthResponseHandler->handle($response);
 
         $responseData = $response->successResponse;
@@ -110,28 +130,6 @@ class RegistrationController extends AbstractController
     }
 
 
-//    #[Route('/api/user/registration/{userId}', name: 'registration-existing-user', methods: 'POST')]
-//    public function registerExistingUser(Request $request, string $userId = null): JsonResponse
-//    {
-//        $registrationRequest = $this->dtoSerializer->deserialize(
-//            $request->getContent(),
-//            RegistrationRequest::class,
-//            'json'
-//        );
-//        $registrationRequestArray = $this->dtoSerializer->toArray($registrationRequest);
-//
-//        $response = $this->client->register($userId, $registrationRequestArray);
-//        $response = $this->fusionAuthResponseHandler->handle($response);
-//
-//        $responseData = $response->successResponse;
-//        $statusCode = $response->status;
-//
-//        $responseContent = $this->dtoSerializerFilter->filter($responseData, Token::class);
-//
-//        return new JsonResponse(data: $responseContent, status: $statusCode, json: true);
-//    }
-
-
     #[OA\Tag(name: 'Registration')]
     #[OA\RequestBody(
         content: new OA\JsonContent(ref: new Model(type: RegistrationRequest::class, groups: ['registration-update'])))
@@ -141,7 +139,12 @@ class RegistrationController extends AbstractController
         description: 'The request was successful',
         content: new OA\JsonContent(
             type: 'array',
-            items: new OA\Items(ref: new Model(type: RegistrationRequest::class, groups: ['registration-retrieve-response']))
+            items: new OA\Items(
+                ref: new Model(
+                type: RegistrationRequest::class,
+                groups: ['registration-retrieve-response']
+            )
+            )
         )
     )]
     #[OA\Response(response: '400', description: 'FusionAuthClientViolation error or Bad Request')]
