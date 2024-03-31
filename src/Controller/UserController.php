@@ -6,30 +6,18 @@ use App\DTO\Entity\User;
 use App\DTO\Request\{CreateUserRequest, SearchRequest};
 use App\DTO\Response\SearchResponse;
 use App\DTO\Response\Token;
-use App\Filter\DtoSerializerFilter;
 use App\Service\Exception\ServiceException;
 use App\Service\Exception\ServiceExceptionData;
-use App\Service\FusionAuthResponseHandler;
-use App\Service\Serializer\DTOSerializer;
-use FusionAuth\FusionAuthClient;
 use Nelmio\ApiDocBundle\Annotation\{Model, Security};
 use OpenApi\Attributes as OA;
-use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Http\Attribute\CurrentUser;
 
-class UserController extends AbstractController
+class UserController extends AbstractFusionAuthApiController
 {
-    public function __construct(
-        private FusionAuthClient $client,
-        private FusionAuthResponseHandler $fusionAuthResponseHandler,
-        private DtoSerializerFilter $dtoSerializerFilter,
-    ) {
-    }
-
 
     #[OA\Tag(name: 'User')]
     #[OA\RequestBody(
@@ -50,10 +38,10 @@ class UserController extends AbstractController
     #[OA\Response(response: '500', description: 'Server Error')]
     #[Security(name: 'Bearer')]
     #[Route('/api/user', name: 'user-retrieve', methods: 'GET')]
-    public function retrieveUser(DTOSerializer $serializer, Request $request): JsonResponse
+    public function retrieveUser(Request $request): JsonResponse
     {
         //todo implement jwt retrieval if loginId is not provided
-        $emailRequest = $serializer->deserialize(
+        $emailRequest = $this->dtoSerializer->deserialize(
             $request->getContent(),
             User::class,
             'json',
@@ -70,6 +58,7 @@ class UserController extends AbstractController
 
         return new JsonResponse(data: $responseContent, status: $statusCode, json: true);
     }
+
 
     #[OA\Tag(name: 'User')]
     #[OA\RequestBody(
@@ -89,15 +78,15 @@ class UserController extends AbstractController
     #[OA\Response(response: '500', description: 'Server Error')]
     #[Security(name: 'Bearer')]
     #[Route('/api/user', name: 'user-create', methods: 'POST')]
-    public function createUser(DTOSerializer $serializer, Request $request): JsonResponse
+    public function createUser(Request $request): JsonResponse
     {
-        $createUserRequest = $serializer->deserialize(
+        $createUserRequest = $this->dtoSerializer->deserialize(
             $request->getContent(),
             CreateUserRequest::class,
             'json',
             validationGroups: ['create']
         );
-        $createUserRequestArray = $serializer->toArray($createUserRequest);;
+        $createUserRequestArray = $this->dtoSerializer->toArray($createUserRequest);;
 
         $response = $this->client->createUser(null, $createUserRequestArray);
         $response = $this->fusionAuthResponseHandler->handle($response);
@@ -130,16 +119,16 @@ class UserController extends AbstractController
     #[OA\Response(response: '500', description: 'Server Error')]
     #[Security(name: 'Bearer')]
     #[Route('/api/user', name: 'user-update', methods: 'PUT')]
-    public function updateUser(DTOSerializer $serializer, Request $request): JsonResponse
+    public function updateUser(Request $request): JsonResponse
     {
-        $createUserRequest = $serializer->deserialize(
+        $createUserRequest = $this->dtoSerializer->deserialize(
             $request->getContent(),
             User::class,
             'json',
             validationGroups: ['update']
         );
 
-        $createUserRequestArray = ['user' => $serializer->toArray($createUserRequest)];
+        $createUserRequestArray = ['user' => $this->dtoSerializer->toArray($createUserRequest)];
         $response = $this->client->updateUser($createUserRequest->getId(), $createUserRequestArray);
 
         $response = $this->fusionAuthResponseHandler->handle($response);
@@ -165,11 +154,10 @@ class UserController extends AbstractController
     #[Security(name: 'Bearer')]
     #[Route('/api/user', name: 'user-delete', methods: 'DELETE')]
     public function deleteUser(
-        DTOSerializer $serializer,
         Request $request,
         #[CurrentUser] ?\App\Security\User $user
     ): JsonResponse {
-        $deleteIdRequest = $serializer->deserialize(
+        $deleteIdRequest = $this->dtoSerializer->deserialize(
             $request->getContent(), User::class, 'json',
             validationGroups: ['delete']
         );
@@ -211,9 +199,9 @@ class UserController extends AbstractController
     #[OA\Response(response: '500', description: 'Server Error')]
     #[Security(name: 'Bearer')]
     #[Route('/api/user/search', name: 'search', methods: 'POST')]
-    public function searchUser(Request $request, DTOSerializer $serializer): JsonResponse
+    public function searchUser(Request $request): JsonResponse
     {
-        $searchRequest = $serializer->deserialize(
+        $searchRequest = $this->dtoSerializer->deserialize(
             $request->getContent(),
             SearchRequest::class,
             'json',
@@ -221,9 +209,9 @@ class UserController extends AbstractController
         );
 
         if ($searchRequest->getNextResults()) {
-            $searchRequest = $serializer->validateDto($searchRequest, 'next-result');
+            $searchRequest = $this->dtoSerializer->validateDto($searchRequest, 'next-result');
         } else {
-            $searchRequest = $serializer->validateDto($searchRequest, 'query');
+            $searchRequest = $this->dtoSerializer->validateDto($searchRequest, 'query');
         }
 
         $response = $this->client->searchUsersByQuery($searchRequest->toArray());

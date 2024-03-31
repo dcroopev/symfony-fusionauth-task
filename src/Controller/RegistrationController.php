@@ -4,27 +4,14 @@ namespace App\Controller;
 
 use App\DTO\Request\RegistrationRequest;
 use App\DTO\Response\Token;
-use App\Filter\DtoSerializerFilter;
-use App\Service\FusionAuthResponseHandler;
-use App\Service\Serializer\DTOSerializer;
-use FusionAuth\FusionAuthClient;
 use Nelmio\ApiDocBundle\Annotation\{Model, Security};
 use OpenApi\Attributes as OA;
-use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Attribute\Route;
 
-class RegistrationController extends AbstractController
+class RegistrationController extends AbstractFusionAuthApiController
 {
-    public function __construct(
-        private DTOSerializer $dtoSerializer,
-        private FusionAuthClient $client,
-        private FusionAuthResponseHandler $fusionAuthResponseHandler,
-        private DtoSerializerFilter $dtoSerializerFilter,
-    ) {
-    }
-
 
     #[OA\Tag(name: 'Registration')]
     #[OA\RequestBody(
