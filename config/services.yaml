@@ -24,8 +24,8 @@ services:
     # please note that last definitions always *replace* previous ones
     FusionAuth\FusionAuthClient:
         arguments:
-            - "8uMZPWqyB69hPNl7aT7ypN4brubSHzmKo4JNPJngYHLXONaZHsAZW7cU"  #todo configure as env variables
-            - "http://localhost:9011"
+            - '%env(FUSIONAUTH_API_KEY)%'
+            - '%env(FUSIONAUTH_APP_URL)%'
 
     App\EventListener\ExceptionListener:
         tags:

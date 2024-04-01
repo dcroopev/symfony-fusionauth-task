@@ -1,6 +1,32 @@
 version: '3'
 
 services:
+  server:
+    build:
+      dockerfile: ./docker/nginx/Dockerfile
+    depends_on:
+      - app
+    networks:
+      - api_net
+
+    ports:
+      - "8000:80"
+      - "443:443"
+    volumes:
+      - ./:/var/www/html/symfony-fusionauth-task
+      - ./docker/nginx/conf.d/default.conf:/etc/nginx/conf.d/default.conf
+
+  app:
+    working_dir: /var/www/html/symfony-fusionauth-task
+    build:
+      dockerfile: ./docker/php/Dockerfile
+    volumes:
+      - ./:/var/www/html/symfony-fusionauth-task
+    networks:
+      - api_net
+
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
   db:
     image: postgres:16.0-bookworm
     environment:
@@ -20,41 +46,10 @@ services:
     volumes:
       - db_data:/var/lib/postgresql/data
 
-  search:
-    image: opensearchproject/opensearch:2.11.0
-    environment:
-      cluster.name: fusionauth
-      discovery.type: single-node
-      node.name: search
-      plugins.security.disabled: 'true'
-      bootstrap.memory_lock: 'true'
-      OPENSEARCH_JAVA_OPTS: ${OPENSEARCH_JAVA_OPTS}
-    healthcheck:
-      interval: 10s
-      retries: 80
-      test: curl --write-out 'HTTP %{http_code}' --fail --silent --output /dev/null http://localhost:9200/
-    restart: unless-stopped
-    ulimits:
-      memlock:
-        soft: -1
-        hard: -1
-      nofile:
-        soft: 65536
-        hard: 65536
-    ports:
-      - "9200:9200" # REST API
-      - "9600:9600" # Performance Analyzer
-    volumes:
-      - search_data:/usr/share/opensearch/data
-    networks:
-      - search_net
-
   fusionauth:
     image: fusionauth/fusionauth-app:latest
     depends_on:
       db:
-        condition: service_healthy
-      search:
         condition: service_healthy
     environment:
       DATABASE_URL: jdbc:postgresql://db:5432/fusionauth
@@ -65,29 +60,35 @@ services:
       FUSIONAUTH_APP_MEMORY: ${FUSIONAUTH_APP_MEMORY}
       FUSIONAUTH_APP_RUNTIME_MODE: ${FUSIONAUTH_APP_RUNTIME_MODE}
       FUSIONAUTH_APP_URL: http://fusionauth:9011
-      SEARCH_SERVERS: http://search:9200
-      SEARCH_TYPE: elasticsearch
+      FUSIONAUTH_APP_KICKSTART_FILE: ${FUSIONAUTH_APP_KICKSTART_FILE}
+
     healthcheck:
       test: curl --silent --fail http://localhost:9011/api/status -o /dev/null -w "%{http_code}"
       interval: 5s
       timeout: 5s
       retries: 5
+    links:
+      - app
+      - server
+
     networks:
+      - api_net
       - db_net
-      - search_net
     restart: unless-stopped
     ports:
       - 9011:9011
     volumes:
       - fusionauth_config:/usr/local/fusionauth/config
+      - ./kickstart:/usr/local/fusionauth/kickstart
+
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
 
 networks:
+  api_net:
   db_net:
-    driver: bridge
-  search_net:
     driver: bridge
 
 volumes:
   db_data:
   fusionauth_config:
-  search_data:
