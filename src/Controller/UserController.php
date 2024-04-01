@@ -5,7 +5,7 @@ namespace App\Controller;
 use App\DTO\Entity\User;
 use App\DTO\Request\{CreateUserRequest, SearchRequest};
 use App\DTO\Response\SearchResponse;
-use App\DTO\Response\Token;
+use App\DTO\Response\TokenResponse;
 use App\Service\Exception\ServiceException;
 use App\Service\Exception\ServiceExceptionData;
 use Nelmio\ApiDocBundle\Annotation\{Model, Security};
@@ -15,6 +15,7 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Http\Attribute\CurrentUser;
+use App\Security\User as LoggedInUser;
 
 class UserController extends AbstractFusionAuthApiController
 {
@@ -61,6 +62,27 @@ class UserController extends AbstractFusionAuthApiController
 
 
     #[OA\Tag(name: 'User')]
+    #[OA\Response(
+        response: '200',
+        description: 'The request was successful',
+        content: new OA\JsonContent(
+            type: 'array',
+            items: new OA\Items(ref: new Model(type: User::class))
+        )
+    )]
+    #[OA\Response(response: '401', description: 'Unauthorized request ')]
+    #[OA\Response(response: '500', description: 'Server Error')]
+    #[Security(name: 'Bearer')]
+    #[Route('/api/user/authenticated', name: 'user-retrieve-logged', methods: 'GET')]
+    public function retrieveLoggedInUser(#[CurrentUser] ?LoggedInUser $user
+    ): JsonResponse {
+        $responseContent = $this->dtoSerializer->serialize($user->getUserDto(), 'json');
+
+        return new JsonResponse(data: $responseContent, status: 200, json: true);
+    }
+
+
+    #[OA\Tag(name: 'User')]
     #[OA\RequestBody(
         content: new OA\JsonContent(ref: new Model(type: CreateUserRequest::class, groups: ['create'])))
     ]
@@ -69,7 +91,7 @@ class UserController extends AbstractFusionAuthApiController
         description: 'The request was successful',
         content: new OA\JsonContent(
             type: 'array',
-            items: new OA\Items(ref: new Model(type: Token::class))
+            items: new OA\Items(ref: new Model(type: TokenResponse::class))
         )
     )]
     #[OA\Response(response: '400', description: 'FusionAuthClientViolation error or Bad Request')]
@@ -94,7 +116,7 @@ class UserController extends AbstractFusionAuthApiController
         $responseData = $response->successResponse;
         $statusCode = $response->status;
 
-        $responseContent = $this->dtoSerializerFilter->filter($responseData, Token::class);
+        $responseContent = $this->dtoSerializerFilter->filter($responseData, TokenResponse::class);
 
         return new JsonResponse(data: $responseContent, status: $statusCode, json: true);
     }
@@ -155,7 +177,7 @@ class UserController extends AbstractFusionAuthApiController
     #[Route('/api/user', name: 'user-delete', methods: 'DELETE')]
     public function deleteUser(
         Request $request,
-        #[CurrentUser] ?\App\Security\User $user
+        #[CurrentUser] ?LoggedInUser $user
     ): JsonResponse {
         $deleteIdRequest = $this->dtoSerializer->deserialize(
             $request->getContent(), User::class, 'json',

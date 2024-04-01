@@ -56,7 +56,7 @@ class DTOSerializer implements SerializerInterface
         return $dto;
     }
 
-    public function validateDto(object $dto, string|array|null $groups = null)
+    public function validateDto(object $dto, string|array|null $groups = null): object
     {
         $event = new ValidateDtoEvent($dto, $groups);
         $this->eventDispatcher->dispatch($event, $event::NAME);
@@ -64,9 +64,9 @@ class DTOSerializer implements SerializerInterface
         return $dto;
     }
 
-    public function toArray(object $object)
+    public function toArray(object $object, array $context = [])
     {
-        return $this->serializer->normalize($object);
+        return $this->serializer->normalize($object, context: $context);
     }
 
 }

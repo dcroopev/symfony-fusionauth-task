@@ -3,12 +3,17 @@
 namespace App\DTO\Response;
 
 use App\DTO\Entity\{Registration, User};
+use Symfony\Component\Serializer\Attribute\Groups;
 
-class Token
+class TokenResponse
 {
+    #[Groups(['token', 'refresh-token'])]
     private ?string $refreshToken;
+
+    #[Groups(['refresh-token'])]
     private ?string $refreshTokenId;
 
+    #[Groups(['token', 'refresh-token'])]
     private ?string $token;
     private ?int $tokenExpirationInstant;
 
@@ -22,7 +27,7 @@ class Token
         return $this->refreshToken;
     }
 
-    public function setRefreshToken(?string $refreshToken): Token
+    public function setRefreshToken(?string $refreshToken): TokenResponse
     {
         $this->refreshToken = $refreshToken;
         return $this;
@@ -33,7 +38,7 @@ class Token
         return $this->refreshTokenId;
     }
 
-    public function setRefreshTokenId(?string $refreshTokenId): Token
+    public function setRefreshTokenId(?string $refreshTokenId): TokenResponse
     {
         $this->refreshTokenId = $refreshTokenId;
         return $this;
@@ -44,7 +49,7 @@ class Token
         return $this->token;
     }
 
-    public function setToken(?string $token): Token
+    public function setToken(?string $token): TokenResponse
     {
         $this->token = $token;
         return $this;
@@ -55,7 +60,7 @@ class Token
         return $this->tokenExpirationInstant;
     }
 
-    public function setTokenExpirationInstant(?int $tokenExpirationInstant): Token
+    public function setTokenExpirationInstant(?int $tokenExpirationInstant): TokenResponse
     {
         $this->tokenExpirationInstant = $tokenExpirationInstant;
         return $this;
@@ -66,7 +71,7 @@ class Token
         return $this->user;
     }
 
-    public function setUser(?User $user): Token
+    public function setUser(?User $user): TokenResponse
     {
         $this->user = $user;
         return $this;
@@ -77,7 +82,7 @@ class Token
         return $this->registration;
     }
 
-    public function setRegistration(?Registration $registration): Token
+    public function setRegistration(?Registration $registration): TokenResponse
     {
         $this->registration = $registration;
         return $this;

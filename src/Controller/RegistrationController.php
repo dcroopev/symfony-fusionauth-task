@@ -3,7 +3,7 @@
 namespace App\Controller;
 
 use App\DTO\Request\RegistrationRequest;
-use App\DTO\Response\Token;
+use App\DTO\Response\TokenResponse;
 use Nelmio\ApiDocBundle\Annotation\{Model, Security};
 use OpenApi\Attributes as OA;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -73,7 +73,7 @@ class RegistrationController extends AbstractFusionAuthApiController
         description: 'The request was successful',
         content: new OA\JsonContent(
             type: 'array',
-            items: new OA\Items(ref: new Model(type: Token::class)) //TODO check token/refreshToken
+            items: new OA\Items(ref: new Model(type: TokenResponse::class)) //TODO check token/refreshToken
         )
     )]
     #[OA\Response(response: '400', description: 'FusionAuthClientViolation error or Bad Request')]
@@ -112,7 +112,7 @@ class RegistrationController extends AbstractFusionAuthApiController
         $responseData = $response->successResponse;
         $statusCode = $response->status;
 
-        $responseContent = $this->dtoSerializerFilter->filter($responseData, Token::class);
+        $responseContent = $this->dtoSerializerFilter->filter($responseData, TokenResponse::class);
 
         return new JsonResponse(data: $responseContent, status: $statusCode, json: true);
     }
