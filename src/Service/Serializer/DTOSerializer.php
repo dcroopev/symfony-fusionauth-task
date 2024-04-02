@@ -64,9 +64,26 @@ class DTOSerializer implements SerializerInterface
         return $dto;
     }
 
+    public function filter(mixed $responseData, string $dtoClassName): string
+    {
+        $filteredResponseData = $this->deserialize(
+            json_encode($responseData),
+            $dtoClassName,
+            format: 'json',
+            validate: false
+        );
+        return $this->serialize($filteredResponseData, format: 'json');
+    }
+
     public function toArray(object $object, array $context = [])
     {
         return $this->serializer->normalize($object, context: $context);
+    }
+
+
+    public function fromData(mixed $data, string $type, ?string $format = null, ?array $context = [])
+    {
+        return $this->serializer->denormalize($data,$type, $format, $context);
     }
 
 }

@@ -2,7 +2,6 @@
 
 namespace App\Security;
 
-use App\Filter\DtoSerializerFilter;
 use App\Service\Serializer\DTOSerializer;
 use FusionAuth\FusionAuthClient;
 use Symfony\Component\Security\Core\Exception\UnsupportedUserException;
@@ -18,7 +17,6 @@ class UserProvider implements UserProviderInterface, PasswordUpgraderInterface
     public function __construct(
         private FusionAuthClient $fusionAuthClient,
         private DTOSerializer $dtoSerializer,
-        private DtoSerializerFilter $dtoSerializerFilter,
     ) {
     }
 

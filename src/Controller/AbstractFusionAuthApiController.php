@@ -2,7 +2,6 @@
 
 namespace App\Controller;
 
-use App\Filter\DtoSerializerFilter;
 use App\Service\FusionAuthResponseHandler;
 use App\Service\Serializer\DTOSerializer;
 use FusionAuth\FusionAuthClient;
@@ -14,7 +13,6 @@ abstract class AbstractFusionAuthApiController extends AbstractController
         protected DTOSerializer $dtoSerializer,
         protected FusionAuthClient $client,
         protected FusionAuthResponseHandler $fusionAuthResponseHandler,
-        protected DtoSerializerFilter $dtoSerializerFilter,
     ) {
     }
 }

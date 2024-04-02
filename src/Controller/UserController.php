@@ -3,6 +3,7 @@
 namespace App\Controller;
 
 use App\DTO\Entity\User;
+use App\DTO\Response\UserResponse;
 use App\DTO\Request\{CreateUserRequest, SearchRequest};
 use App\DTO\Response\SearchResponse;
 use App\DTO\Response\TokenResponse;
@@ -30,7 +31,7 @@ class UserController extends AbstractFusionAuthApiController
         description: 'The request was successful',
         content: new OA\JsonContent(
             type: 'array',
-            items: new OA\Items(ref: new Model(type: User::class))
+            items: new OA\Items(ref: new Model(type: UserResponse::class))
         )
     )]
     #[OA\Response(response: '400', description: 'FusionAuthClientViolation error or `Bad Request` ')]
@@ -47,18 +48,14 @@ class UserController extends AbstractFusionAuthApiController
             $request->getContent(),
             User::class,
             'json',
+            context: ['groups' => ['retrieve']],
+            //todo validationGroups to Groups and use the groups value to fill context
             validationGroups: ['retrieve']
         );
 
         $response = $this->client->retrieveUserByLoginId($emailRequest->getEmail());
-        $response = $this->fusionAuthResponseHandler->handle($response);
 
-        $responseData = $response->successResponse;
-        $statusCode = $response->status;
-
-        $responseContent = $this->dtoSerializerFilter->filter($responseData->user, User::class);
-
-        return new JsonResponse(data: $responseContent, status: $statusCode, json: true);
+        return $this->fusionAuthResponseHandler->createJsonResponse($response, UserResponse::class);
     }
 
 
@@ -108,19 +105,15 @@ class UserController extends AbstractFusionAuthApiController
             $request->getContent(),
             CreateUserRequest::class,
             'json',
+            context: ['groups' => ['create']],
             validationGroups: ['create']
         );
+
         $createUserRequestArray = $this->dtoSerializer->toArray($createUserRequest);;
 
         $response = $this->client->createUser(null, $createUserRequestArray);
-        $response = $this->fusionAuthResponseHandler->handle($response);
 
-        $responseData = $response->successResponse;
-        $statusCode = $response->status;
-
-        $responseContent = $this->dtoSerializerFilter->filter($responseData, TokenResponse::class);
-
-        return new JsonResponse(data: $responseContent, status: $statusCode, json: true);
+        return $this->fusionAuthResponseHandler->createJsonResponse($response, TokenResponse::class);
     }
 
 
@@ -134,7 +127,7 @@ class UserController extends AbstractFusionAuthApiController
         description: 'The request was successful',
         content: new OA\JsonContent(
             type: 'array',
-            items: new OA\Items(ref: new Model(type: User::class))
+            items: new OA\Items(ref: new Model(type: UserResponse::class))
         )
     )]
     #[OA\Response(response: '400', description: 'FusionAuthClientViolation error or Bad Request')]
@@ -146,23 +139,18 @@ class UserController extends AbstractFusionAuthApiController
     #[Route('/api/user', name: 'user-update', methods: 'PUT')]
     public function updateUser(Request $request): JsonResponse
     {
-        $createUserRequest = $this->dtoSerializer->deserialize(
+        $updateRequest = $this->dtoSerializer->deserialize(
             $request->getContent(),
             User::class,
             'json',
+            context: ['groups' => ['update']],
             validationGroups: ['update']
         );
 
-        $createUserRequestArray = ['user' => $this->dtoSerializer->toArray($createUserRequest)];
-        $response = $this->client->updateUser($createUserRequest->getId(), $createUserRequestArray);
+        $updateUserRequestArray = ['user' => $this->dtoSerializer->toArray($updateRequest)];
+        $response = $this->client->updateUser($updateRequest->getId(), $updateUserRequestArray);
 
-        $response = $this->fusionAuthResponseHandler->handle($response);
-        $responseData = $response->successResponse;
-        $statusCode = $response->status;
-
-        $responseContent = $this->dtoSerializerFilter->filter($responseData->user, User::class);
-
-        return new JsonResponse(data: $responseContent, status: $statusCode, json: true);
+        return $this->fusionAuthResponseHandler->createJsonResponse($response, UserResponse::class);
     }
 
 
@@ -174,6 +162,7 @@ class UserController extends AbstractFusionAuthApiController
     #[OA\Response(response: '200', description: 'The request was successful')]
     #[OA\Response(response: '400', description: 'FusionAuthClientViolation error or Bad Request')]
     #[OA\Response(response: '401', description: 'Unauthorized request ')]
+    #[OA\Response(response: '403', description: 'Self-delete forbidden ')]
     #[OA\Response(response: '404', description: 'User not found')]
     #[OA\Response(response: '422', description: 'Constraint Violation Error')]
     #[OA\Response(response: '500', description: 'Server Error')]
@@ -184,29 +173,28 @@ class UserController extends AbstractFusionAuthApiController
         #[CurrentUser] ?LoggedInUser $user
     ): JsonResponse {
         $deleteIdRequest = $this->dtoSerializer->deserialize(
-            $request->getContent(), User::class, 'json',
+            $request->getContent(),
+            User::class,
+            'json',
+            context: ['groups' => ['delete']],
             validationGroups: ['delete']
         );
 
-        if ($deleteIdRequest->getId() === $user->getId()) {
+        if ($deleteIdRequest->getId() === $user->getUserDto()->getId()) {
             $exceptionData = new ServiceExceptionData(Response::HTTP_FORBIDDEN, "Self-delete Not Allowed");
             throw new ServiceException($exceptionData);
         }
 
         $response = $this->client->deleteUser($deleteIdRequest->getId());
-        $response = $this->fusionAuthResponseHandler->handle($response);
 
-
-        $statusCode = $response->status;
-
-        return new JsonResponse(status: $statusCode);
+        return $this->fusionAuthResponseHandler->createJsonResponse($response);
     }
 
 
     #[OA\Tag(name: 'User')]
     #[OA\RequestBody(
         description: "Search for users either by a `queryString` or by `nextResults` token. Two bodies possible. ",
-        content: new OA\JsonContent( oneOf: [
+        content: new OA\JsonContent(oneOf: [
             new OA\Schema(ref: new Model(type: SearchRequest::class, groups: ['query'])),
             new OA\Schema(ref: new Model(type: SearchRequest::class, groups: ['next-result']))
         ]))
@@ -242,13 +230,7 @@ class UserController extends AbstractFusionAuthApiController
         }
 
         $response = $this->client->searchUsersByQuery($searchRequest->toArray());
-        $response = $this->fusionAuthResponseHandler->handle($response);
 
-        $responseData = $response->successResponse;
-        $statusCode = $response->status;
-
-        $responseContent = $this->dtoSerializerFilter->filter($responseData, SearchResponse::class);
-
-        return new JsonResponse($responseContent, status: $statusCode, json: true);
+        return $this->fusionAuthResponseHandler->createJsonResponse($response, SearchResponse::class);
     }
 }

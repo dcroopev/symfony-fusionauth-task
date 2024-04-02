@@ -66,12 +66,8 @@ class EventController extends AbstractFusionAuthApiController
         ];
 
         $response = $this->client->sendEmail($templateId, $emailRequest);
-        $response = $this->fusionAuthResponseHandler->handle($response);
 
-        $responseData = $response->successResponse;
-        $statusCode = $response->status;
-
-        return new JsonResponse(data: $responseData, status: $statusCode);
+        return $this->fusionAuthResponseHandler->createJsonResponse($response);
     }
 
     private function fetchTemplateId(string $templateName): ?string

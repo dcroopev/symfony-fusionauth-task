@@ -7,28 +7,15 @@ use App\DTO\Request\TokenRequest;
 use App\DTO\Request\LoginRequest;
 use App\DTO\Response\RefreshTokenResponse;
 use App\DTO\Response\TokenResponse;
-use App\Filter\DtoSerializerFilter;
-use App\Service\FusionAuthResponseHandler;
-use App\Service\Serializer\DTOSerializer;
-use FusionAuth\FusionAuthClient;
 use Nelmio\ApiDocBundle\Annotation\{Model, Security};
 use OpenApi\Attributes as OA;
-use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Http\AccessToken\HeaderAccessTokenExtractor;
 
-class SecurityController extends AbstractController
+class SecurityController extends AbstractFusionAuthApiController
 {
-
-    public function __construct(
-        private FusionAuthClient $client,
-        private DTOSerializer $dtoSerializer,
-        private FusionAuthResponseHandler $fusionAuthResponseHandler,
-        private DtoSerializerFilter $dtoSerializerFilter,
-    ) {
-    }
 
     #[OA\Tag(name: 'Authentication')]
     #[OA\RequestBody(
@@ -63,14 +50,8 @@ class SecurityController extends AbstractController
         $loginRequestArray = $this->dtoSerializer->toArray($loginRequest);
 
         $response = $this->client->login($loginRequestArray);
-        $response = $this->fusionAuthResponseHandler->handle($response);
 
-        $responseData = $response->successResponse;
-        $statusCode = $response->status;
-
-        $responseContent = $this->dtoSerializerFilter->filter($responseData, TokenResponse::class);
-
-        return new JsonResponse(data: $responseContent, status: $statusCode, json: true);
+        return $this->fusionAuthResponseHandler->createJsonResponse($response, TokenResponse::class);
     }
 
     #[OA\Tag(name: 'Authentication')]
@@ -101,11 +82,8 @@ class SecurityController extends AbstractController
         $refreshTokenRequestArray = $this->dtoSerializer->toArray($logoutRequest);
 
         $response = $this->client->logoutWithRequest($refreshTokenRequestArray);
-        $response = $this->fusionAuthResponseHandler->handle($response);
 
-        $statusCode = $response->status;
-
-        return new JsonResponse(status: $statusCode);
+        return $this->fusionAuthResponseHandler->createJsonResponse($response);
     }
 
 
@@ -155,12 +133,7 @@ class SecurityController extends AbstractController
         );
         $response = $this->fusionAuthResponseHandler->handle($response);
 
-        $responseData = $response->successResponse;
-        $statusCode = $response->status;
-
-        $responseContent = $this->dtoSerializerFilter->filter($responseData, TokenResponse::class);
-
-        return new JsonResponse(data: $responseContent, status: $statusCode, json: true);
+        return $this->fusionAuthResponseHandler->createJsonResponse($response, TokenResponse::class);
     }
 
 
@@ -193,13 +166,7 @@ class SecurityController extends AbstractController
 
         $response = $this->client->retrieveRefreshTokenById($refreshTokenRequest->getRefreshTokenId());
 
-        $response = $this->fusionAuthResponseHandler->handle($response);
-        $responseData = $response->successResponse;
-        $statusCode = $response->status;
-
-        $responseContent = $this->dtoSerializerFilter->filter($responseData, RefreshTokenResponse::class);
-
-        return new JsonResponse(data: $responseContent, status: $statusCode, json: true);
+        return $this->fusionAuthResponseHandler->createJsonResponse($response, RefreshTokenResponse::class);
     }
 
     #[OA\Tag(name: 'Authentication')]
@@ -235,13 +202,7 @@ class SecurityController extends AbstractController
         $refreshTokenRequestArray = $this->dtoSerializer->toArray($refreshTokenRequest);
         $response = $this->client->exchangeRefreshTokenForJWT($refreshTokenRequestArray);
 
-        $response = $this->fusionAuthResponseHandler->handle($response);
-        $responseData = $response->successResponse;
-        $statusCode = $response->status;
-
-        $responseContent = $this->dtoSerializerFilter->filter($responseData, TokenResponse::class);
-
-        return new JsonResponse(data: $responseContent, status: $statusCode, json: true);
+        return $this->fusionAuthResponseHandler->createJsonResponse($response, TokenResponse::class);
     }
 
     #[OA\Tag(name: 'Authentication')]
@@ -270,10 +231,7 @@ class SecurityController extends AbstractController
             $revokeRequest->getApplicationId()
         );
 
-        $response = $this->fusionAuthResponseHandler->handle($response);
-        $statusCode = $response->status;
-
-        return new JsonResponse(status: $statusCode);
+        return $this->fusionAuthResponseHandler->createJsonResponse($response);
     }
 
 

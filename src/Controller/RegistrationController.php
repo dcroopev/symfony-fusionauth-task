@@ -44,20 +44,17 @@ class RegistrationController extends AbstractFusionAuthApiController
             $request->getContent(),
             RegistrationRequest::class,
             'json',
+            context: ['groups' => ['registration-retrieve']],
             validationGroups: ['registration-retrieve']
         );
         $response = $this->client->retrieveRegistration(
             $retrieveRequest->getUser()->getId(),
             $retrieveRequest->getRegistration()->getApplicationId()
         );
-        $response = $this->fusionAuthResponseHandler->handle($response);
 
-        $responseData = $response->successResponse;
-        $statusCode = $response->status;
+        //todo RegistrationRequest - structure it better - Request named object is used for response
+        return $this->fusionAuthResponseHandler->createJsonResponse($response, RegistrationRequest::class);
 
-        $responseContent = $this->dtoSerializerFilter->filter($responseData, RegistrationRequest::class);
-
-        return new JsonResponse(data: $responseContent, status: $statusCode, json: true);
     }
 
 
@@ -112,14 +109,8 @@ class RegistrationController extends AbstractFusionAuthApiController
         $registrationRequestArray = $this->dtoSerializer->toArray($registrationRequest);
 
         $response = $this->client->register($userId, $registrationRequestArray);
-        $response = $this->fusionAuthResponseHandler->handle($response);
 
-        $responseData = $response->successResponse;
-        $statusCode = $response->status;
-
-        $responseContent = $this->dtoSerializerFilter->filter($responseData, TokenResponse::class);
-
-        return new JsonResponse(data: $responseContent, status: $statusCode, json: true);
+        return $this->fusionAuthResponseHandler->createJsonResponse($response, TokenResponse::class);
     }
 
 
@@ -154,18 +145,15 @@ class RegistrationController extends AbstractFusionAuthApiController
             $request->getContent(),
             RegistrationRequest::class,
             'json',
+            context: ['groups' => ['registration-update']],
             validationGroups: ['registration-update']
         );
+
         $updateRequestArray = $this->dtoSerializer->toArray($updateRequest);
         $response = $this->client->updateRegistration($updateRequest->getUser()->getId(), $updateRequestArray);
-        $response = $this->fusionAuthResponseHandler->handle($response);
 
-        $responseData = $response->successResponse;
-        $statusCode = $response->status;
+        return $this->fusionAuthResponseHandler->createJsonResponse($response, RegistrationRequest::class);
 
-        $responseContent = $this->dtoSerializerFilter->filter($responseData, RegistrationRequest::class);
-
-        return new JsonResponse(data: $responseContent, status: $statusCode, json: true);
     }
 
     #[OA\Tag(name: 'Registration')]
@@ -189,6 +177,7 @@ class RegistrationController extends AbstractFusionAuthApiController
             $request->getContent(),
             RegistrationRequest::class,
             'json',
+            context: ['groups' => ['registration-retrieve']],
             validationGroups: ['registration-retrieve']
         );
 
@@ -196,11 +185,9 @@ class RegistrationController extends AbstractFusionAuthApiController
             $deleteRequest->getUser()->getId(),
             $deleteRequest->getRegistration()->getApplicationId()
         );
-        $response = $this->fusionAuthResponseHandler->handle($response);
 
-        $statusCode = $response->status;
+        return $this->fusionAuthResponseHandler->createJsonResponse($response);
 
-        return new JsonResponse(status: $statusCode);
     }
 
 }
