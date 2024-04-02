@@ -63,6 +63,10 @@ class RegistrationController extends AbstractFusionAuthApiController
 
     #[OA\Tag(name: 'Registration')]
     #[OA\RequestBody(
+        description: "Create user registration. Two request bodies possible - for new, and for existing users. 
+        The `registration` object in both request share the same structure. As for the user object - if `user.id` 
+        is provided then the request will try to register an `existing` user. In the other case a new User will
+        be created along and therefore bot `email` and `password` fields are mandatory",
         content: new OA\JsonContent(oneOf: [
             new OA\Schema(ref: new Model(type: RegistrationRequest::class, groups: ['registration-new-user'])),
             new OA\Schema(ref: new Model(type: RegistrationRequest::class, groups: ['registration-existing-user']))
@@ -70,10 +74,11 @@ class RegistrationController extends AbstractFusionAuthApiController
     ]
     #[OA\Response(
         response: '200',
-        description: 'The request was successful',
+        description: 'The request was successful. A `Token` response is sent back which consists of both the `JWT` and
+        the `refresh` tokens depending on the configuration.',
         content: new OA\JsonContent(
             type: 'array',
-            items: new OA\Items(ref: new Model(type: TokenResponse::class)) //TODO check token/refreshToken
+            items: new OA\Items(ref: new Model(type: TokenResponse::class))
         )
     )]
     #[OA\Response(response: '400', description: 'FusionAuthClientViolation error or Bad Request')]
@@ -120,6 +125,7 @@ class RegistrationController extends AbstractFusionAuthApiController
 
     #[OA\Tag(name: 'Registration')]
     #[OA\RequestBody(
+        description: "Update user registration",
         content: new OA\JsonContent(ref: new Model(type: RegistrationRequest::class, groups: ['registration-update'])))
     ]
     #[OA\Response(
@@ -164,6 +170,7 @@ class RegistrationController extends AbstractFusionAuthApiController
 
     #[OA\Tag(name: 'Registration')]
     #[OA\RequestBody(
+        description: 'Deletes a User Registration',
         content: new OA\JsonContent(
             ref: new Model(type: RegistrationRequest::class, groups: ['registration-retrieve'])
         ))

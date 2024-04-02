@@ -31,6 +31,10 @@ class SecurityController extends AbstractController
     }
 
     #[OA\Tag(name: 'Authentication')]
+    #[OA\RequestBody(
+        description: "User/Password authentication. Generates tokens.",
+        content: new OA\JsonContent(ref: new Model(type: LoginRequest::class)))
+    ]
     #[OA\Response(
         response: '200',
         description: 'The authentication was successful. ',
@@ -52,9 +56,6 @@ class SecurityController extends AbstractController
     #[OA\Response(response: '422', description: 'Constraint Violation Error')]
     #[OA\Response(response: '423', description: 'User is Locked')]
     #[OA\Response(response: '500', description: 'Server Error')]
-    #[OA\RequestBody(
-        content: new OA\JsonContent(ref: new Model(type: LoginRequest::class)))
-    ]
     #[Route('/api/login', name: 'login', methods: 'POST')]
     public function login(Request $request): JsonResponse
     {
@@ -74,6 +75,7 @@ class SecurityController extends AbstractController
 
     #[OA\Tag(name: 'Authentication')]
     #[OA\RequestBody(
+        description: "Revokes a single refresh token.",
         content: new OA\JsonContent(ref: new Model(type: TokenRequest::class, groups: ['refresh-token'])))
     ]
     #[OA\Response(response: '200', description: 'The request was successful. Refresh token has been revoked if it had existed.')]
@@ -109,7 +111,8 @@ class SecurityController extends AbstractController
 
     #[OA\Tag(name: 'Authentication')]
     #[OA\RequestBody(
-        content: new OA\JsonContent(ref: new Model(type: TokenRequest::class)))
+        description: "Issues a JWT token. The jwt token, needed for the request is already provided in the `Authorization: Bearer` header",
+        content: new OA\JsonContent(ref: new Model(type: TokenRequest::class, groups: ['issue-jwt'])))
     ]
     #[OA\Response(
         response: '200',
@@ -135,7 +138,12 @@ class SecurityController extends AbstractController
     #[Route('/api/jwt/issue', name: 'jwt-issue', methods: 'POST')]
     public function issueJwt(Request $request): JsonResponse
     {
-        $jwtRequest = $this->dtoSerializer->deserialize($request->getContent(), TokenRequest::class, 'json');
+        $jwtRequest = $this->dtoSerializer->deserialize(
+            $request->getContent(),
+            TokenRequest::class,
+            'json',
+            validationGroups: 'issue-jwt'
+        );
         $headerTokenExtractor = new HeaderAccessTokenExtractor();
 
         $encodedJwt = $headerTokenExtractor->extractAccessToken($request);
@@ -159,7 +167,7 @@ class SecurityController extends AbstractController
     #[OA\Tag(name: 'Authentication')]
     #[OA\Parameter(
         name: 'refreshTokenId',
-        description: 'Get the refresh token object that corresponds to ths refreshTokenId',
+        description: 'Get the refresh token object that corresponds to ths refreshTokenId (UUID)',
         in: 'path',
         schema: new OA\Schema(type: 'string')
     )]
@@ -196,6 +204,7 @@ class SecurityController extends AbstractController
 
     #[OA\Tag(name: 'Authentication')]
     #[OA\RequestBody(
+        description: 'Takes a `refreshToken` and provides a new set of `jwt` and `refresh` tokens.',
         content: new OA\JsonContent(ref: new Model(type: TokenRequest::class, groups: ['refresh-token'])))
     ]
     #[OA\Response(
@@ -237,6 +246,7 @@ class SecurityController extends AbstractController
 
     #[OA\Tag(name: 'Authentication')]
     #[OA\RequestBody(
+        description: "Revokes all session for the given user in the given application",
         content: new OA\JsonContent(ref: new Model(type: RevokeSessionRequest::class)))
     ]
     #[OA\Response(response: '200', description: 'The request was successful. All existing sessions for the given user in the given application have been revoked.')]

@@ -22,6 +22,7 @@ class UserController extends AbstractFusionAuthApiController
 
     #[OA\Tag(name: 'User')]
     #[OA\RequestBody(
+        description: "Retrieve user information",
         content: new OA\JsonContent(ref: new Model(type: User::class, groups: ['retrieve'])))
     ]
     #[OA\Response(
@@ -84,6 +85,7 @@ class UserController extends AbstractFusionAuthApiController
 
     #[OA\Tag(name: 'User')]
     #[OA\RequestBody(
+        description: "Create user",
         content: new OA\JsonContent(ref: new Model(type: CreateUserRequest::class, groups: ['create'])))
     ]
     #[OA\Response(
@@ -124,6 +126,7 @@ class UserController extends AbstractFusionAuthApiController
 
     #[OA\Tag(name: 'User')]
     #[OA\RequestBody(
+        description: "Update the information of the user (including password).",
         content: new OA\JsonContent(ref: new Model(type: User::class, groups: ['update'])))
     ]
     #[OA\Response(
@@ -165,6 +168,7 @@ class UserController extends AbstractFusionAuthApiController
 
     #[OA\Tag(name: 'User')]
     #[OA\RequestBody(
+        description: "Hard delete users",
         content: new OA\JsonContent(ref: new Model(type: User::class, groups: ['delete'])))
     ]
     #[OA\Response(response: '200', description: 'The request was successful')]
@@ -189,7 +193,7 @@ class UserController extends AbstractFusionAuthApiController
             throw new ServiceException($exceptionData);
         }
 
-        $response = $this->client->deactivateUser($deleteIdRequest->getId());
+        $response = $this->client->deleteUser($deleteIdRequest->getId());
         $response = $this->fusionAuthResponseHandler->handle($response);
 
 
@@ -201,7 +205,8 @@ class UserController extends AbstractFusionAuthApiController
 
     #[OA\Tag(name: 'User')]
     #[OA\RequestBody(
-        content: new OA\JsonContent(oneOf: [
+        description: "Search for users either by a `queryString` or by `nextResults` token. Two bodies possible. ",
+        content: new OA\JsonContent( oneOf: [
             new OA\Schema(ref: new Model(type: SearchRequest::class, groups: ['query'])),
             new OA\Schema(ref: new Model(type: SearchRequest::class, groups: ['next-result']))
         ]))

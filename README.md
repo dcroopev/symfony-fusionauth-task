@@ -19,15 +19,15 @@ Configure the FusionAuth on http://localhost:9011/admin - I tried to expose a ki
 
 `Webhooks` settings:
 1) Go to Settings -> Webhook menu and create one.
-- URL - I used `http://host.docker.internal:8000/api/webhook/event` in order to call the `http://localhost:8000` but the only progress I managed to make was to go from a `Connection refused` to a `Connection timeout` error.
-- I used `https://webhook.site/` in order to see what the request is and with it - work on the `/api/webhook/event` endpoint
-2) Here again enable only the `user.registration.create` event and save.
+- URL - I used `http://host.docker.internal:8000/api/webhook/event` in order to call the `http://localhost:8000/api/webhook/event` but the only progress I managed to make was to go from a `Connection refused` to a `Connection timeout` error.
+- I used `https://webhook.site/` in order to see what the event request body and work on the `/api/webhook/event` action
 
-Email template:
+`Email` template:
 1) Go to Customizations -> Email templates
 2) Add one with `User Registration` - The name is hardcoded in the `/api/webhook/event` action.
 3) Fill in the `HTML template` and `Text template` text areas
 
 
 Detailed Open API documentation is available at: `http://localhost:8000/api/doc`
+- all endpoints except the `/api/login` and `/api/webhook/event` have additional `JWT Authorization` in the form of a `Authorization: Bearer` token.
 
