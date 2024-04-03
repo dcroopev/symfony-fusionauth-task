@@ -1,13 +1,26 @@
 # Symfony FusionAuth task
 
-### Steps to install project:
+## Steps to install project:
 1) Git Init and `git clone https://github.com/dcroopev/symfony-fusionauth-task.git`
 2) `git checkout main`
 3) `composer install`
 4) `docker compose up -d`
 
-### Configure the FusionAuth on http://localhost:9011/admin 
- _I tried to expose a kickstart.json but with little success_
+
+
+## Configure the FusionAuth:
+ #### I succeeded configure a kickstart.json, so after a `docker compose up -d` command all the necessary components should be created  _
+
+- By default, an application named "Application 1" should be created with refresh token settings `on`.
+- Default tenant should be configured with the webhook event of 'User Registration' `on`
+- Webhook with the appropriate url `http://local.docker.api:80/api/webhook/event`
+- Email template `User Registration` for the webhook endpoint to use
+
+<br><br>
+<br><br>
+
+#### If the kickstart doesn't manage to apply the default settings here a step-step-guide:
+
 
 1) Create Administrator account
 2) Create API key from Settings -> API Keys and put it in your env variables as `FUSIONAUTH_API_KEY`. For the purpose of the exercise, make it a superkey (default)
@@ -24,7 +37,7 @@ Edit the `Default` tenant:
 
 #### _Webhooks_ settings:
 Go to Settings -> Webhook menu and create one.
-- URL - I used `http://host.docker.internal:8000/api/webhook/event` in order to call the `http://localhost:8000/api/webhook/event` but the only progress I managed to make was to go from a `Connection refused` to a `Connection timeout` error.
+- URL - I used `http://local.docker.api:80/api/webhook/event` in order to call the `http://localhost:8001/api/webhook/event`
 - I used `https://webhook.site/` in order to see what the event request body and work on the `/api/webhook/event` action
 
 #### _Email_ template:
@@ -33,6 +46,6 @@ Go to Settings -> Webhook menu and create one.
 3) Fill in the `HTML template` and `Text template` text areas
 
 
-Detailed Open API documentation is available at the OpenAPI [api/doc](http://localhost:8000/api/doc) route.
+Detailed Open API documentation is available at the OpenAPI [api/doc](http://localhost:8001/api/doc) route.
 
 All endpoints except the `/api/login` and `/api/webhook/event` have additional `JWT Authorization` in the form of a `Authorization: Bearer` token.
