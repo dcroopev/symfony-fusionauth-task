@@ -1,0 +1,108 @@
+{
+  "variables": {
+    "apiKey": "#{ENV.FUSIONAUTH_API_KEY}",
+    "adminEmail": "#{ENV.FUSIONAUTH_ADMIN_EMAIL}",
+    "adminUser": "#{ENV.FUSIONAUTH_ADMIN_EMAIL}",
+    "adminPassword": "#{ENV.FUSIONAUTH_ADMIN_PASSWORD}",
+    "defaultApplicationId": "#{FUSIONAUTH_APPLICATION_ID}",
+    "webhookUrl": "#{ENV.FUSIONAUTH_WEBHOOK_URL}",
+    "defaultTenantId": "ac226492-fc1f-2176-9aed-6320d74c274b",
+    "app1_id": "be3c60b7-0d88-4b13-b56b-3b90bd9e382c",
+    "app2_id": "6baf4a19-30b5-4c40-adca-74dff604b8a7",
+    "adminUserId": "00000000-0000-0000-0000-000000000001",
+    "defaultKeyId": "79a3a12d-f793-160c-25f4-bc0ce61712dc",
+    "defaultAccessTokenKeyId": "79a3a12d-f793-160c-25f4-bc0ce61712dc",
+    "openIdSha256KeyId": "092dbedc-30af-4149-9c61-b578f2c72f59",
+    "openIdSha384KeyId": "4b8f1c06-518e-45bd-9ac5-d549686ae02a",
+    "openIdSha512KeyId": "c753a44d-7f2e-48d3-bc4e-c2c16488a23b",
+    "webhookId": "626519dc-5fb8-4e63-be4d-25daadd1cb8a",
+    "userRegistrationTemplateId": "2cdc5c57-4410-433e-a2c3-04f36fde5318"
+  },
+  "apiKeys": [
+    {
+      "key": "#{apiKey}",
+      "description": "Unrestricted API key"
+    }
+  ],
+  "requests": [
+    {
+      "method": "POST",
+      "url": "/api/user/registration/#{adminUserId}",
+      "body": {
+        "registration": {
+          "applicationId": "#{FUSIONAUTH_APPLICATION_ID}",
+          "roles": [
+            "admin"
+          ]
+        },
+        "roles": [
+          "admin"
+        ],
+        "skipRegistrationVerification": true,
+        "user": {
+          "email": "#{adminEmail}",
+          "firstName": "Admin",
+          "lastName": "Adminov",
+          "password": "#{adminPassword}"
+        }
+      }
+    },
+    {
+      "method": "PATCH",
+      "url": "/api/tenant/#{defaultTenantId}",
+      "body": {
+        "tenant": {
+          "emailConfiguration": {
+            "defaultFromEmail": "#{ENV.FUSIONAUTH_DEFAULT_FROM_EMAIL}",
+            "defaultFromName": "#{ENV.FUSIONAUTH_DEFAULT_FROM_NAME}",
+            "host": "#{ENV.FUSIONAUTH_DEFAULT_SMTP_HOST}",
+            "password": "#{ENV.FUSIONAUTH_DEFAULT_SMTP_PASSWORD}",
+            "port": "#{ENV.FUSIONAUTH_DEFAULT_FROM_PORT}",
+            "security": "#{ENV.FUSIONAUTH_DEFAULT_SECURITY}",
+            "username": "#{ENV.FUSIONAUTH_DEFAULT_SMTP_USERNAME}"
+          },
+          "eventConfiguration": {
+            "events": {
+              "user.registration.create": {
+                "enabled": true,
+                "transactionType": "None"
+              }
+            }
+          },
+          "id": "#{defaultTenantId}"
+        }
+      }
+    },
+    {
+      "method": "POST",
+      "url": "/api/webhook/#{app1_id}",
+      "body": {
+        "webhook": {
+          "description": "Symfony Fusion API Task",
+          "connectTimeout": 2000,
+          "readTimeout": 3000,
+          "eventsEnabled": {
+            "user.registration.create": true
+          },
+          "global": true,
+          "id": "#{webhookId}",
+          "tenantIds": [],
+          "url": "#{webhookUrl}"
+        }
+      }
+    },
+    {
+      "method": "POST",
+      "url": "/api/email/template/#{userRegistrationTemplateId}",
+      "body": {
+        "emailTemplate": {
+          "defaultHtmlTemplate": "Welcome ${user.name}, \r\n<br>\r\nYou have successfully registered your user.\r\n<br>\r\n\r\n- FusionAuth Admin",
+          "defaultSubject": "Verify your registration",
+          "defaultTextTemplate": "Welcome ${user.name}, \r\n<br>\r\nYou have successfully registered your user.\r\n<br>\r\n\r\n- FusionAuth Admin",
+          "id": "#{userRegistrationTemplateId}",
+          "name": "User Registration"
+        }
+      }
+    }
+  ]
+}

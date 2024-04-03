@@ -7,11 +7,11 @@ services:
     depends_on:
       - app
     networks:
-      - api_net
-
+      api_net:
+        aliases:
+          - local.docker.api
     ports:
-      - "8000:80"
-      - "443:443"
+      - "8001:80"
     volumes:
       - ./:/var/www/html/symfony-fusionauth-task
       - ./docker/nginx/conf.d/default.conf:/etc/nginx/conf.d/default.conf
@@ -25,8 +25,6 @@ services:
     networks:
       - api_net
 
-    extra_hosts:
-      - "host.docker.internal:host-gateway"
   db:
     image: postgres:16.0-bookworm
     environment:
@@ -61,6 +59,20 @@ services:
       FUSIONAUTH_APP_RUNTIME_MODE: ${FUSIONAUTH_APP_RUNTIME_MODE}
       FUSIONAUTH_APP_URL: http://fusionauth:9011
       FUSIONAUTH_APP_KICKSTART_FILE: ${FUSIONAUTH_APP_KICKSTART_FILE}
+      FUSIONAUTH_ADMIN_PASSWORD: ${FUSIONAUTH_ADMIN_PASSWORD}
+      FUSIONAUTH_API_KEY: ${FUSIONAUTH_API_KEY}
+      FUSIONAUTH_APPLICATION_ID: ${FUSIONAUTH_APPLICATION_ID}
+      FUSIONAUTH_TENANT_ID: ${FUSIONAUTH_TENANT_ID}
+      FUSIONAUTH_USER_REGISTRATION_ID: ${FUSIONAUTH_USER_REGISTRATION_ID}
+      FUSIONAUTH_ADMIN_EMAIL: ${FUSIONAUTH_ADMIN_EMAIL}
+      FUSIONAUTH_WEBHOOK_URL: ${FUSIONAUTH_WEBHOOK_URL}
+      FUSIONAUTH_DEFAULT_FROM_NAME: ${FUSIONAUTH_DEFAULT_FROM_NAME}
+      FUSIONAUTH_DEFAULT_FROM_PORT: ${FUSIONAUTH_DEFAULT_FROM_PORT}
+      FUSIONAUTH_DEFAULT_SECURITY: ${FUSIONAUTH_DEFAULT_SECURITY}
+      FUSIONAUTH_DEFAULT_FROM_EMAIL: ${FUSIONAUTH_DEFAULT_FROM_EMAIL}
+      FUSIONAUTH_DEFAULT_SMTP_HOST: ${FUSIONAUTH_DEFAULT_SMTP_HOST}
+      FUSIONAUTH_DEFAULT_SMTP_USERNAME: ${FUSIONAUTH_DEFAULT_SMTP_USERNAME}
+      FUSIONAUTH_DEFAULT_SMTP_PASSWORD: ${FUSIONAUTH_DEFAULT_SMTP_PASSWORD}
 
     healthcheck:
       test: curl --silent --fail http://localhost:9011/api/status -o /dev/null -w "%{http_code}"
@@ -68,21 +80,19 @@ services:
       timeout: 5s
       retries: 5
     links:
-      - app
       - server
 
     networks:
       - api_net
       - db_net
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     restart: unless-stopped
     ports:
-      - 9011:9011
+      - "9011:9011"
     volumes:
       - fusionauth_config:/usr/local/fusionauth/config
       - ./kickstart:/usr/local/fusionauth/kickstart
-
-    extra_hosts:
-      - "host.docker.internal:host-gateway"
 
 networks:
   api_net:
