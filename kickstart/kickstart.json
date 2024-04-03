@@ -7,7 +7,7 @@
     "defaultApplicationId": "#{FUSIONAUTH_APPLICATION_ID}",
     "webhookUrl": "#{ENV.FUSIONAUTH_WEBHOOK_URL}",
     "defaultTenantId": "ac226492-fc1f-2176-9aed-6320d74c274b",
-    "app1_id": "be3c60b7-0d88-4b13-b56b-3b90bd9e382c",
+    "app1_id": "7ccaf906-3362-49af-af8c-88e34f406cd0",
     "app2_id": "6baf4a19-30b5-4c40-adca-74dff604b8a7",
     "adminUserId": "00000000-0000-0000-0000-000000000001",
     "defaultKeyId": "79a3a12d-f793-160c-25f4-bc0ce61712dc",
@@ -75,7 +75,50 @@
     },
     {
       "method": "POST",
-      "url": "/api/webhook/#{app1_id}",
+      "url": "/api/application/#{app1_id}",
+      "body": {
+        "application": {
+          "authenticationTokenConfiguration": {
+            "enabled": false
+          },
+          "id": "#{app1_id}",
+          "jwtConfiguration": {
+            "enabled": true,
+            "idTokenKeyId": "#{openIdSha256KeyId}",
+            "refreshTokenUsagePolicy": "Reusable"
+          },
+          "loginConfiguration": {
+            "allowTokenRefresh": true,
+            "generateRefreshTokens": true,
+            "requireAuthentication": true
+          },
+          "name": "Application 1",
+          "oauthConfiguration": {
+            "enabledGrants": [
+              "refresh_token",
+              "authorization_code"
+            ],
+            "generateRefreshTokens": true,
+            "requireClientAuthentication": true,
+            "requireRegistration": false
+          },
+          "roles": [
+            {
+              "id": "be3c60b7-0d88-4b13-b56b-3b90bd9e382c",
+              "isDefault": false,
+              "isSuperRole": true,
+              "name": "Super"
+            }
+          ],
+          "tenantId": "#{defaultTenantId}"
+        }
+      }
+    },
+
+
+    {
+      "method": "POST",
+      "url": "/api/webhook/#{webhookId}",
       "body": {
         "webhook": {
           "description": "Symfony Fusion API Task",
