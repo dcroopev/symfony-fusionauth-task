@@ -3,13 +3,15 @@
 namespace App\DTO\Entity;
 
 
+use Symfony\Component\Validator\Constraints as Assert;
+
 class Event
 {
-    const string WEBHOOK_REGISTRATION_EVENT = 'user.registration.create';
 
     private ?string $id;
 
-    private ?string $type;
+    #[Assert\NotBlank(message: "No event has been specified.")]
+    private ?string $type = null;
 
     private ?Registration $registration;
 
